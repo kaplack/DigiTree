@@ -17,9 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", (req, res) => {
-  res
-    .status(200)
-    .json({ message: "Bienvenido al modulo de registro de usuario" });
+  res.status(200).json({ message: "Bienvenido al API de DigiTree" });
 });
 
 // Routes

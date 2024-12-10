@@ -47,7 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new Error("No se pudo registrar el usuario");
   }
 
-  res.send("Register Route with router");
+  //res.send("Register Route with router");
 });
 
 // @desc    Login a user

@@ -3,7 +3,8 @@ import { FaSignInAlt } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { login } from "../features/auth/authSlice";
+import { login, reset } from "../features/auth/authSlice";
+import Spinner from "../components/Spinner";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -26,17 +27,16 @@ function Login() {
     }
 
     //redirect when Logged in
-    // if(isSuccess || user){
-
-    //     navigate('/')
-    // }
+    if (user) {
+      navigate("/");
+    }
+    return () => {
+      dispatch(reset());
+    };
   }, [isError, user, message, navigate, dispatch]);
 
   const onChange = (e) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const onSubmit = (e) => {
@@ -47,17 +47,12 @@ function Login() {
       password,
     };
 
-    dispatch(login(userData))
-      .unwrap()
-      .then(() => {
-        navigate("/");
-      })
-      .catch(toast.error);
+    dispatch(login(userData));
   };
 
-  // if (isLoading) {
-  //   return <Spinner />;
-  // }
+  if (isLoading) {
+    return <Spinner />;
+  }
 
   return (
     <>

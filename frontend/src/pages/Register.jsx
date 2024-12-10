@@ -76,6 +76,7 @@ function Register() {
   // if (isLoading) {
   //   return <Spinner />;
   // }
+  //console.log(process.env.REACT_APP_API_URL);
 
   return (
     <>

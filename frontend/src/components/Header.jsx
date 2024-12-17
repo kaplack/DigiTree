@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { FaSignInAlt, FaSignOutAlt, FaUser, FaBars } from "react-icons/fa";
+import {
+  FaSignInAlt,
+  FaSignOutAlt,
+  FaUser,
+  FaBars,
+  FaHome,
+  FaQuestion,
+  FaCartPlus,
+  FaAmbulance,
+  FaRecycle,
+  FaChartLine,
+} from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, reset } from "../features/auth/authSlice";
@@ -59,138 +70,269 @@ function Header() {
           </>
         )}
       </ul>
-      {isMenuOpen && (
-        <div className={`menu ${isMenuOpen ? "menu--open" : ""}`}>
-          <ul className="menu__list">
-            <li>
-              <Link to="/">Inicio</Link>
-            </li>
-            <li>
-              <button
-                className="menu__parent"
-                onClick={() => handleMenuToggle(0)}
-              >
-                Consultas
-              </button>
-              {activeMenu === 0 && (
-                <ul className="submenu">
-                  <li>
-                    <Link to="/stock">Stock del medicamento</Link>
-                  </li>
-                  <li>
-                    <Link to="/ubicacion">Ubicación / vencimiento</Link>
-                  </li>
-                  <li>
-                    <Link to="/trazabilidad">Trazabilidad</Link>
-                  </li>
-                  <li>
-                    <Link to="/marcos">Marcos contractuales</Link>
-                  </li>
-                  <li>
-                    <Link to="/proveedores">Proveedores</Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-            <li>
-              <button
-                className="menu__parent"
-                onClick={() => handleMenuToggle(1)}
-              >
-                Compras
-              </button>
-              {activeMenu === 1 && (
-                <ul className="submenu">
-                  <li>
-                    <Link to="/compras-regulares">Compras regulares</Link>
-                  </li>
-                  <li>
-                    <Link to="/compras-automaticas">Compras automáticas</Link>
-                  </li>
-                  <li>
-                    <Link to="/configuracion">Configuración</Link>
-                  </li>
-                  <li>
-                    <Link to="/estadisticas">Estadísticas</Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-            <li>
-              <button
-                className="menu__parent"
-                onClick={() => handleMenuToggle(2)}
-              >
-                Distribución
-              </button>
-              {activeMenu === 2 && (
-                <ul className="submenu">
-                  <li>
-                    <Link to="/compras-regulares">Compras regulares</Link>
-                  </li>
-                  <li>
-                    <Link to="/compras-automaticas">Compras automáticas</Link>
-                  </li>
-                  <li>
-                    <Link to="/configuracion">Configuración</Link>
-                  </li>
-                  <li>
-                    <Link to="/estadisticas">Estadísticas</Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-            <li>
-              <button
-                className="menu__parent"
-                onClick={() => handleMenuToggle(3)}
-              >
-                Redistribución
-              </button>
-              {activeMenu === 3 && (
-                <ul className="submenu">
-                  <li>
-                    <Link to="/compras-regulares">Compras regulares</Link>
-                  </li>
-                  <li>
-                    <Link to="/compras-automaticas">Compras automáticas</Link>
-                  </li>
-                  <li>
-                    <Link to="/configuracion">Configuración</Link>
-                  </li>
-                  <li>
-                    <Link to="/estadisticas">Estadísticas</Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-            <li>
-              <button
-                className="menu__parent"
-                onClick={() => handleMenuToggle(4)}
-              >
-                Estimaciones
-              </button>
-              {activeMenu === 4 && (
-                <ul className="submenu">
-                  <li>
-                    <Link to="/analisis">Análisis de estimaciones</Link>
-                  </li>
-                  <li>
-                    <Link to="/regresion-demanda">Regresión de demanda</Link>
-                  </li>
-                  <li>
-                    <Link to="/regresion-oferta">Regresión de oferta</Link>
-                  </li>
-                  <li>
-                    <Link to="/reportes">Reportes</Link>
-                  </li>
-                </ul>
-              )}
-            </li>
-          </ul>
-        </div>
-      )}
+      <div className={`menu ${isMenuOpen ? "menu--open" : ""}`}>
+        <ul className="menu__list">
+          <li>
+            <Link to="/" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <FaHome className="home-icon" />
+              Inicio
+            </Link>
+          </li>
+          <li>
+            <button
+              className="menu__parent"
+              onClick={() => handleMenuToggle(0)}
+            >
+              <FaQuestion />
+              Consultas{" "}
+              <span className={activeMenu === 0 ? "derecha rotate" : "derecha"}>
+                {" "}
+                &#62;
+              </span>
+            </button>
+            {activeMenu === 0 && (
+              <ul className="submenu">
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="consulta/stock"
+                  >
+                    Stock del medicamento
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="consulta/ubicacionvencimiento"
+                  >
+                    Ubicación / vencimiento
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="consulta/trazabilidad"
+                  >
+                    Trazabilidad
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="consulta/marcos-contractuales"
+                  >
+                    Marcos contractuales
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="consulta/proveedores"
+                  >
+                    Proveedores
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          <li>
+            <button
+              className="menu__parent"
+              onClick={() => handleMenuToggle(1)}
+            >
+              <FaCartPlus />
+              Compras
+              <span className={activeMenu === 1 ? "derecha rotate" : "derecha"}>
+                {" "}
+                &#62;
+              </span>
+            </button>
+            {activeMenu === 1 && (
+              <ul className="submenu">
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="compras/regulares"
+                  >
+                    Compras regulares
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="compras/automaticas"
+                  >
+                    Compras automáticas
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="compras/configuracion"
+                  >
+                    Configuración
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="compras/estadisticas"
+                  >
+                    Estadísticas
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          <li>
+            <button
+              className="menu__parent"
+              onClick={() => handleMenuToggle(2)}
+            >
+              <FaAmbulance />
+              Distribución
+              <span className={activeMenu === 2 ? "derecha rotate" : "derecha"}>
+                {" "}
+                &#62;
+              </span>
+            </button>
+            {activeMenu === 2 && (
+              <ul className="submenu">
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="distribucion/ingresomedicamentos"
+                  >
+                    Ingreso de Medicamentos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="distribucion/salidademedicamentos"
+                  >
+                    Salida de Medicamentos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="distribucion/contabilizaciones"
+                  >
+                    Contabilizaiones
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="distribucion/reportes"
+                  >
+                    Reportes
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          <li>
+            <button
+              className="menu__parent"
+              onClick={() => handleMenuToggle(3)}
+            >
+              <FaAmbulance />
+              Redistribución
+              <span className={activeMenu === 3 ? "derecha rotate" : "derecha"}>
+                {" "}
+                &#62;
+              </span>
+            </button>
+            {activeMenu === 3 && (
+              <ul className="submenu">
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="redistribucion/ingresomedicamentos"
+                  >
+                    Ingreso de Medicamentos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="redistribucion/salidademedicamentos"
+                  >
+                    Salida de Medicamentos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="redistribucion/contabilizaciones"
+                  >
+                    Contabilizaiones
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="redistribucion/reportes"
+                  >
+                    Reportes
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+          <li>
+            <button
+              className="menu__parent"
+              onClick={() => handleMenuToggle(4)}
+            >
+              <FaChartLine />
+              Estimaciones
+              <span className={activeMenu === 4 ? "derecha rotate" : "derecha"}>
+                {" "}
+                &#62;
+              </span>
+            </button>
+            {activeMenu === 4 && (
+              <ul className="submenu">
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="estimaciones/analisis"
+                  >
+                    Análisis de estimaciones
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="estimaciones/regresiondemanda"
+                  >
+                    Regresión de demanda
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="estimaciones/regresionoferta"
+                  >
+                    Regresión de oferta
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    to="estimaciones/reportes"
+                  >
+                    Reportes
+                  </Link>
+                </li>
+              </ul>
+            )}
+          </li>
+        </ul>
+      </div>
     </header>
   );
 }

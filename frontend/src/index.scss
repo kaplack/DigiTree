@@ -419,25 +419,29 @@ footer {
 /* Menu general */
 .menu {
   position: absolute;
-  top: 4.8rem;
-  left: 0;
+  opacity: 0;
+
+  top: 4.9rem;
+  //left: -300px;
   min-width: 300px;
-  height: 90vh;
+  height: 80vh;
   background-color: #444;
   color: white;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
+  //display: flex;
+  // flex-direction: column;
   padding: 2rem;
 
   /* Añadir transición suave */
-  transform: translateX(-100%); /* Oculta el menú inicialmente */
-  transition: transform 0.3s ease-in-out; /* Transición al aparecer */
+  transform: translateX(-300px); /* Oculta el menú inicialmente */
+  transition: all 0.3s ease-in-out; /* Transición al aparecer */
 }
 
 /* Cuando el menú está abierto */
 .menu.menu--open {
   transform: translateX(0); /* Mueve el menú a su posición original */
+  opacity: 1;
+  //left: 0;
 }
 
 .menu__list {
@@ -451,6 +455,9 @@ footer {
   margin: 0 !important;
   padding: 0;
   line-height: 2.2;
+  a {
+    color: white;
+  }
 }
 
 .menu__parent {
@@ -459,22 +466,39 @@ footer {
   color: white;
   cursor: pointer;
   font-size: 1.2rem;
-  display: block;
+  display: flex;
   text-align: left !important;
+  padding: 0.5rem 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+.home-icon {
+  margin-left: 0.2rem;
+  margin-right: 0.5rem !important;
 }
 
 .submenu {
   font-size: 1rem;
   list-style: none;
+  //height: 0;
+  //opacity: 0;
   padding-left: 1rem;
   margin-top: 0.5rem;
   display: flex;
   flex-direction: column;
   align-items: baseline !important;
+  transition: all 0.3s ease-in-out;
+}
+
+.show-submenu {
+  height: 100%;
+  opacity: 1;
 }
 
 .submenu li {
-  margin: 0.5rem 0;
+  margin: 0 !important;
+  font-style: italic;
+  font-size: 1rem;
 }
 
 .submenu a {
@@ -500,3 +524,82 @@ footer {
 //     left: auto;
 //   }
 // }
+.derecha {
+  transform: rotate(0deg);
+  transition: all 0.3s;
+}
+.rotate {
+  transform: rotate(90deg);
+}
+
+// formularios
+.med-container {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 2rem;
+
+  h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 20px;
+  }
+
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+
+      label {
+        font-size: 0.9rem;
+        color: #333;
+        font-weight: bold;
+      }
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1rem;
+      background-color: #fff;
+    }
+
+    .scan-group {
+      display: flex;
+      align-items: center;
+
+      .qr-icon {
+        margin-left: 10px;
+        color: #333;
+        font-size: 1.5em;
+      }
+    }
+
+    .form-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+  }
+}
+
+// fin formularios
+
+.path {
+  text-align: left;
+  margin-bottom: 2rem;
+}

@@ -11,7 +11,12 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      process.env.REACT_APP_CLIENT_URL || "https://digitree-pearl.vercel.app",
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

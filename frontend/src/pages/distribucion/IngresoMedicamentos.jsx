@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FaQrcode } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Path from "../../components/Path";
+import BarcodeScanner from "../../components/BarcoderScanner";
 
 const IngresoMedicamento = () => {
   const [formData, setFormData] = useState({
@@ -66,10 +67,11 @@ const IngresoMedicamento = () => {
                 placeholder="Ingrese el código"
               />
             </div>
-            <div className="form-group scan-group">
+            {/* <div className="form-group scan-group">
               <label htmlFor="scan">Scan</label>
               <FaQrcode className="qr-icon" />
-            </div>
+            </div> */}
+            <BarcodeScanner />
           </div>
 
           {/* Nombre de Almacén */}

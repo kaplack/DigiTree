@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node backend/index.js",
     "server": "nodemon backend/index.js",
-    "client": "npm start --prefix frontend",
+    "client": "npm start --host 0.0.0.0 --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
   "author": "Alan Burga",

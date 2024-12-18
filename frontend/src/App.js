@@ -26,6 +26,7 @@ import Analisis from "./pages/estimaciones/Analisis";
 import RegresionDemanda from "./pages/estimaciones/RegresionDemanda";
 import RegresionOferta from "./pages/estimaciones/RegresionOferta";
 import EstReportes from "./pages/estimaciones/Reportes";
+import MobileScannerForm from "./pages/MobileScannerForm";
 
 function App() {
   return (
@@ -121,6 +122,11 @@ function App() {
             <Route
               path="estimaciones/reportes"
               element={<EstReportes />}
+            ></Route>
+
+            <Route
+              path="mobile-scanner"
+              element={<MobileScannerForm />}
             ></Route>
           </Routes>
         </div>

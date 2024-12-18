@@ -18,7 +18,7 @@ const MobileScannerForm = () => {
 
         // Busca una cámara trasera
         const rearCamera = videoInputDevices.find((device) =>
-          device.label.toLowerCase().includes("macro")
+          device.label.toLowerCase().includes("back")
         );
 
         // Si no se encuentra cámara trasera, usa la primera disponible

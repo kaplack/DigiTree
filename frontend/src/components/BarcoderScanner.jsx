@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { BrowserMultiFormatReader } from "@zxing/library";
+import React, { useState, useEffect } from "react";
+import { BrowserMultiFormatReader } from "@zxing/library"; // Usamos BrowserMultiFormatReader
 import { QRCodeCanvas } from "qrcode.react";
 
 const BarcodeScanner = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [barcode, setBarcode] = useState("");
   const [mobileUrl, setMobileUrl] = useState("");
-  const [isScannerStarted, setIsScannerStarted] = useState(false); // Nuevo estado para manejar el inicio del escáner
 
-  // Detectar si es un móvil o tablet
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor;
     setIsMobile(/android|iphone|ipad|ipod/i.test(userAgent));
 
-    // Generar URL para dispositivos móviles
     if (!/android|iphone|ipad|ipod/i.test(userAgent)) {
       setMobileUrl(`${window.location.origin}/mobile-scanner`);
     }
@@ -22,31 +19,24 @@ const BarcodeScanner = () => {
   // Función para iniciar el escáner en móvil/tablet
   const startScanner = async () => {
     try {
-      const codeReader = new BrowserMultiFormatReader();
-      const videoInputDevices = await codeReader.getVideoInputDevices();
+      const codeReader = new BrowserMultiFormatReader(); // Usamos BrowserMultiFormatReader
+      const videoInputDevices = await codeReader.listVideoInputDevices(); // listVideoInputDevices
+      const firstDeviceId = videoInputDevices[0]?.deviceId;
 
-      // Buscar la cámara principal (trasera) si está disponible
-      const backCamera = videoInputDevices.find((device) =>
-        device.label.toLowerCase().includes("back")
-      );
-      const firstDeviceId = backCamera
-        ? backCamera.deviceId
-        : videoInputDevices[0]?.deviceId;
-
-      if (!firstDeviceId) {
-        console.error("No se encontró una cámara disponible.");
-        return;
+      if (firstDeviceId) {
+        // Usamos el método recomendado para la detección
+        codeReader
+          .decodeFromVideoInput(firstDeviceId, "video")
+          .then((result) => {
+            setBarcode(result.text); // Código detectado
+            codeReader.reset(); // Reseteamos el lector después del escaneo
+          })
+          .catch((error) => {
+            console.error("Error al escanear:", error);
+          });
+      } else {
+        console.error("No se encontraron cámaras disponibles");
       }
-
-      // Iniciar el escáner con la cámara seleccionada
-      await codeReader
-        .decodeFromInputVideoDevice(firstDeviceId, "video")
-        .then((result) => {
-          setBarcode(result.text);
-          codeReader.reset();
-        });
-
-      setIsScannerStarted(true); // Marcar que el escáner ha iniciado
     } catch (error) {
       console.error("Error al acceder a la cámara:", error);
     }
@@ -57,20 +47,12 @@ const BarcodeScanner = () => {
       {isMobile ? (
         <div>
           <h3>Escanea el código de barras:</h3>
-          {!isScannerStarted ? (
-            <div>
-              <video
-                id="video"
-                width="100%"
-                style={{ border: "1px solid #ccc" }}
-              ></video>
-              <button onClick={startScanner}>Iniciar Escáner</button>
-            </div>
-          ) : (
-            <p>
-              Escáner iniciado. Por favor, apunte hacia un código de barras.
-            </p>
-          )}
+          <video
+            id="video"
+            width="100%"
+            style={{ border: "1px solid #ccc" }}
+          ></video>
+          <button onClick={startScanner}>Iniciar Escáner</button>
           {barcode && <p>Código Detectado: {barcode}</p>}
         </div>
       ) : (

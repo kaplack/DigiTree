@@ -21,11 +21,15 @@ const MobileScannerForm = () => {
           device.label.toLowerCase().includes("back")
         );
 
-        // Si encuentra la cámara trasera, usa su deviceId; de lo contrario, usa el primero disponible
+        // Si no se encuentra cámara trasera, usa la primera disponible
         selectedDeviceId =
           rearCamera?.deviceId || videoInputDevices[0]?.deviceId;
 
-        // Comienza a escanear usando la cámara seleccionada
+        if (!selectedDeviceId) {
+          throw new Error("No se pudo encontrar una cámara compatible.");
+        }
+
+        // Inicia el escáner en la cámara seleccionada
         codeReader.decodeFromVideoDevice(
           selectedDeviceId,
           videoRef.current,
@@ -50,7 +54,7 @@ const MobileScannerForm = () => {
     startScanner();
 
     return () => {
-      // Detenemos el escáner al desmontar el componente
+      // Detener el escáner al desmontar el componente
       codeReader.reset();
     };
   }, []);

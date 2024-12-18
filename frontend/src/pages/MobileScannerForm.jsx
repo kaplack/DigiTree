@@ -1,35 +1,80 @@
-import React, { useState } from "react";
-import { BrowserBarcodeReader } from "@zxing/library";
+import React, { useEffect, useRef, useState } from "react";
+import { BrowserMultiFormatReader } from "@zxing/library";
 
 const MobileScannerForm = () => {
-  const [barcode, setBarcode] = useState("");
+  const videoRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [scanResult, setScanResult] = useState("");
 
-  const startMobileScanner = async () => {
-    const codeReader = new BrowserBarcodeReader();
-    const videoInputDevices = await codeReader.getVideoInputDevices();
-    const firstDeviceId = videoInputDevices[0]?.deviceId;
+  useEffect(() => {
+    const codeReader = new BrowserMultiFormatReader();
+    let selectedDeviceId = null;
 
-    codeReader
-      .decodeFromInputVideoDevice(firstDeviceId, "video")
-      .then((result) => {
-        setBarcode(result.text);
-        codeReader.reset();
-      });
-  };
+    const startScanner = async () => {
+      try {
+        // Lista los dispositivos de video (cámaras disponibles)
+        const videoInputDevices = await codeReader.listVideoInputDevices();
+        console.log("Cámaras disponibles:", videoInputDevices);
+
+        // Busca una cámara trasera
+        const rearCamera = videoInputDevices.find((device) =>
+          device.label.toLowerCase().includes("back")
+        );
+
+        // Si encuentra la cámara trasera, usa su deviceId; de lo contrario, usa el primero disponible
+        selectedDeviceId =
+          rearCamera?.deviceId || videoInputDevices[0]?.deviceId;
+
+        // Comienza a escanear usando la cámara seleccionada
+        codeReader.decodeFromVideoDevice(
+          selectedDeviceId,
+          videoRef.current,
+          (result, err) => {
+            if (result) {
+              setScanResult(result.text); // Muestra el resultado escaneado
+              console.log("Código escaneado:", result.text);
+            }
+            if (err && !(err instanceof codeReader.NotFoundException)) {
+              console.error("Error al escanear:", err);
+            }
+          }
+        );
+      } catch (err) {
+        console.error("Error al iniciar el escáner:", err);
+        setError(
+          "No se pudo acceder a la cámara. Asegúrate de otorgar permisos."
+        );
+      }
+    };
+
+    startScanner();
+
+    return () => {
+      // Detenemos el escáner al desmontar el componente
+      codeReader.reset();
+    };
+  }, []);
 
   return (
     <div>
-      <h3>Escanea el código de barras</h3>
-      <video
-        id="video"
-        width="100%"
-        style={{ border: "1px solid #ccc" }}
-      ></video>
-      <button onClick={startMobileScanner}>Iniciar Cámara</button>
-      {barcode && <p>Código Detectado: {barcode}</p>}
-      <button onClick={() => console.log("Enviar código:", barcode)}>
-        Enviar Código
-      </button>
+      <h1>Lector de Códigos de Barra</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {!error && (
+        <>
+          <video
+            ref={videoRef}
+            style={{ width: "100%", maxHeight: "400px" }}
+            autoPlay
+            muted
+          ></video>
+          {scanResult && (
+            <div>
+              <h2>Resultado Escaneado:</h2>
+              <p>{scanResult}</p>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

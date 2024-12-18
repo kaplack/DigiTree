@@ -6,6 +6,7 @@ const BarcodeScanner = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [barcode, setBarcode] = useState("");
   const [mobileUrl, setMobileUrl] = useState("");
+  const [isScannerStarted, setIsScannerStarted] = useState(false); // Nuevo estado para manejar el inicio del escáner
 
   // Detectar si es un móvil o tablet
   useEffect(() => {
@@ -23,14 +24,29 @@ const BarcodeScanner = () => {
     try {
       const codeReader = new BrowserBarcodeReader();
       const videoInputDevices = await codeReader.getVideoInputDevices();
-      const firstDeviceId = videoInputDevices[0]?.deviceId;
 
-      codeReader
+      // Buscar la cámara principal (trasera) si está disponible
+      const backCamera = videoInputDevices.find((device) =>
+        device.label.toLowerCase().includes("back")
+      );
+      const firstDeviceId = backCamera
+        ? backCamera.deviceId
+        : videoInputDevices[0]?.deviceId;
+
+      if (!firstDeviceId) {
+        console.error("No se encontró una cámara disponible.");
+        return;
+      }
+
+      // Iniciar el escáner con la cámara seleccionada
+      await codeReader
         .decodeFromInputVideoDevice(firstDeviceId, "video")
         .then((result) => {
           setBarcode(result.text);
           codeReader.reset();
         });
+
+      setIsScannerStarted(true); // Marcar que el escáner ha iniciado
     } catch (error) {
       console.error("Error al acceder a la cámara:", error);
     }
@@ -41,12 +57,20 @@ const BarcodeScanner = () => {
       {isMobile ? (
         <div>
           <h3>Escanea el código de barras:</h3>
-          <video
-            id="video"
-            width="100%"
-            style={{ border: "1px solid #ccc" }}
-          ></video>
-          <button onClick={startScanner}>Iniciar Escáner</button>
+          {!isScannerStarted ? (
+            <div>
+              <video
+                id="video"
+                width="100%"
+                style={{ border: "1px solid #ccc" }}
+              ></video>
+              <button onClick={startScanner}>Iniciar Escáner</button>
+            </div>
+          ) : (
+            <p>
+              Escáner iniciado. Por favor, apunte hacia un código de barras.
+            </p>
+          )}
           {barcode && <p>Código Detectado: {barcode}</p>}
         </div>
       ) : (

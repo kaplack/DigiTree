@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BrowserBarcodeReader } from "@zxing/library";
+import { BrowserMultiFormatReader } from "@zxing/library";
 import { QRCodeCanvas } from "qrcode.react";
 
 const BarcodeScanner = () => {
@@ -22,7 +22,7 @@ const BarcodeScanner = () => {
   // Función para iniciar el escáner en móvil/tablet
   const startScanner = async () => {
     try {
-      const codeReader = new BrowserBarcodeReader();
+      const codeReader = new BrowserMultiFormatReader();
       const videoInputDevices = await codeReader.getVideoInputDevices();
 
       // Buscar la cámara principal (trasera) si está disponible

@@ -67,10 +67,6 @@ const IngresoMedicamento = () => {
                 placeholder="Ingrese el código"
               />
             </div>
-            {/* <div className="form-group scan-group">
-              <label htmlFor="scan">Scan</label>
-              <FaQrcode className="qr-icon" />
-            </div> */}
             <BarcodeScanner />
           </div>
 

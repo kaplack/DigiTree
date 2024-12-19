@@ -124,10 +124,10 @@ function App() {
               element={<EstReportes />}
             ></Route>
 
-            <Route
+            {/* <Route
               path="mobile-scanner"
               element={<MobileScannerForm />}
-            ></Route>
+            ></Route> */}
           </Routes>
         </div>
       </Router>

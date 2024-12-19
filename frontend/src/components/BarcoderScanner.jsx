@@ -26,7 +26,7 @@ const BarcodeScanner = () => {
         await scanner.start(
           { facingMode: "environment" }, // Usar la cámara trasera
           {
-            fps: 60, // Velocidad de escaneo
+            fps: 30, // Velocidad de escaneo
             qrbox: { width: 250, height: 250 }, // Tamaño del área de escaneo
           },
           (decodedText) => {

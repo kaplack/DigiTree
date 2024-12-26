@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { FaQrcode, FaStop, FaBarcode } from "react-icons/fa6";
+import { CiBarcode } from "react-icons/ci";
 
-const BarcodeScanner = () => {
+const BarcodeScanner = ({ formData, setFormData }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanner, setScanner] = useState(null); // Usar el estado para el escáner
 
@@ -32,6 +34,10 @@ const BarcodeScanner = () => {
           (decodedText) => {
             console.log(`Código detectado: ${decodedText}`);
             document.getElementById("itemCode").value = decodedText; // Colocar el código en el input
+            setFormData({
+              ...formData,
+              codigoItem: decodedText,
+            });
             scanner.stop().then(() => setIsScanning(false));
           },
           (error) => {
@@ -63,19 +69,17 @@ const BarcodeScanner = () => {
     <div className="barcode-scanner">
       {isScanning ? (
         <button type="button" onClick={stopScanner} className="btn btn-scan">
-          Detener Escáner
+          <FaStop size={40} /> <span>Detener scanner</span>
         </button>
       ) : (
         <button type="button" onClick={handleScan} className="btn btn-scan">
-          Escanear Código
+          <CiBarcode size={40} /> <span>Iniciar scanner</span>
         </button>
       )}
 
       <div
         id="reader"
-        style={
-          isScanning ? { width: "300px", height: "300px" } : { display: "none" }
-        }
+        style={isScanning ? { width: "300px" } : { display: "none" }}
       ></div>
     </div>
   );

@@ -27,6 +27,11 @@ import RegresionDemanda from "./pages/estimaciones/RegresionDemanda";
 import RegresionOferta from "./pages/estimaciones/RegresionOferta";
 import EstReportes from "./pages/estimaciones/Reportes";
 import MobileScannerForm from "./pages/MobileScannerForm";
+import Consulta from "./pages/consulta/Consulta";
+import Compra from "./pages/compras/Compra";
+import Distribucion from "./pages/distribucion/Distribucion";
+import Estimaciones from "./pages/estimaciones/Estimaciones";
+import Redistribucion from "./pages/redistribucion/Redistribucion";
 
 function App() {
   return (
@@ -40,6 +45,8 @@ function App() {
             <Route path="/register" element={<Register />}></Route>
 
             {/* CONSULTA **********************************************************************/}
+
+            <Route path="consultas" element={<Consulta />}></Route>
             <Route path="consulta/stock" element={<Stock />}></Route>
             <Route
               path="consulta/ubicacionvencimiento"
@@ -59,6 +66,7 @@ function App() {
             ></Route>
 
             {/* COMPRAS **********************************************************************/}
+            <Route path="compras" element={<Compra />}></Route>
             <Route
               path="compras/regulares"
               element={<ComprasRegulares />}
@@ -77,6 +85,7 @@ function App() {
             ></Route>
 
             {/* Distribución **********************************************************************/}
+            <Route path="distribucion" element={<Distribucion />}></Route>
             <Route
               path="distribucion/ingresomedicamentos"
               element={<IngresoMedicamentos />}
@@ -92,6 +101,7 @@ function App() {
             <Route path="distribucion/reportes" element={<Reportes />}></Route>
 
             {/* Re-Distribución **********************************************************************/}
+            <Route path="redistribucion" element={<Redistribucion />}></Route>
             <Route
               path="redistribucion/ingresomedicamentos"
               element={<ReIngresoMedicamento />}
@@ -110,6 +120,8 @@ function App() {
             ></Route>
 
             {/* Estimaciones *************************************************************************/}
+
+            <Route path="estimaciones" element={<Estimaciones />}></Route>
             <Route path="estimaciones/analisis" element={<Analisis />}></Route>
             <Route
               path="estimaciones/regresiondemanda"

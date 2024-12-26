@@ -3,29 +3,31 @@ import { FaQrcode } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
+import { useDispatch } from "react-redux";
+import { createMed } from "../../features/med/medSlice";
 
 const IngresoMedicamento = () => {
   const [formData, setFormData] = useState({
     medicamento: "",
     codigoItem: "",
-    scan: "",
     almacen: "",
     codigoAlmacen: "",
-    ubigeo1: "",
+    ubigeoAlmacen: "",
     codigoFarmacia: "",
-    ubigeo2: "",
+    ubigeoFarmacia: "",
   });
 
   const {
     medicamento,
     codigoItem,
-    scan,
     almacen,
     codigoAlmacen,
-    ubigeo1,
+    ubigeoAlmacen,
     codigoFarmacia,
-    ubigeo2,
+    ubigeoFarmacia,
   } = formData;
+
+  const dispatch = useDispatch();
 
   const onChange = (e) => {
     setFormData({
@@ -36,6 +38,8 @@ const IngresoMedicamento = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
+
+    dispatch(createMed(formData));
     console.log("Datos del formulario:", formData);
   };
 
@@ -51,24 +55,30 @@ const IngresoMedicamento = () => {
             <input
               type="text"
               id="medicationName"
+              name="medicamento"
               className="input"
               placeholder="Ingrese el nombre"
+              onChange={onChange}
+              value={formData.medicamento}
             />
           </div>
 
           {/* Código de Ítem y Scan */}
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="itemCode">Código de Ítem (Unidad / Lote)</label>
-              <input
-                type="text"
-                id="itemCode"
-                className="input"
-                placeholder="Ingrese el código"
-              />
-            </div>
-            <BarcodeScanner />
+
+          <div className="form-group" id="scan-section">
+            <label htmlFor="itemCode">Código de Ítem (Unidad / Lote)</label>
+            <input
+              type="text"
+              id="itemCode"
+              name="codigoItem"
+              className="input"
+              placeholder="Ingrese el código"
+              onChange={onChange}
+              value={formData.codigoItem}
+            />
           </div>
+
+          <BarcodeScanner setFormData={setFormData} formData={formData} />
 
           {/* Nombre de Almacén */}
           <div className="form-group">
@@ -78,6 +88,9 @@ const IngresoMedicamento = () => {
               id="warehouseName"
               className="input"
               placeholder="Ingrese el nombre del almacén"
+              name="almacen"
+              onChange={onChange}
+              value={formData.almacen}
             />
           </div>
 
@@ -90,15 +103,21 @@ const IngresoMedicamento = () => {
                 id="warehouseCode"
                 className="input"
                 placeholder="Ingrese el código"
+                name="codigoAlmacen"
+                onChange={onChange}
+                value={formData.codigoAlmacen}
               />
             </div>
             <div className="form-group">
-              <label htmlFor="warehouseUbigeo">Ubigeo</label>
+              <label htmlFor="warehouseUbigeo">Ubigeo Almacén</label>
               <input
                 type="text"
                 id="warehouseUbigeo"
                 className="input"
                 placeholder="Ingrese el ubigeo"
+                name="ubigeoAlmacen"
+                onChange={onChange}
+                value={formData.ubigeoAlmacen}
               />
             </div>
           </div>
@@ -112,25 +131,31 @@ const IngresoMedicamento = () => {
                 id="pharmacyCode"
                 className="input"
                 placeholder="Ingrese el código"
+                name="codigoFarmacia"
+                onChange={onChange}
+                value={formData.codigoFarmacia}
               />
             </div>
             <div className="form-group">
-              <label htmlFor="pharmacyUbigeo">Ubigeo</label>
+              <label htmlFor="pharmacyUbigeo">Ubigeo Farmacia</label>
               <input
                 type="text"
                 id="pharmacyUbigeo"
                 className="input"
                 placeholder="Ingrese el ubigeo"
+                name="ubigeoFarmacia"
+                onChange={onChange}
+                value={formData.ubigeoFarmacia}
               />
             </div>
           </div>
 
           {/* Botones */}
           <div className="form-buttons">
-            <button type="button" className="btn btn-reverse">
+            {/* <button type="button" className="btn btn-reverse">
               Reporte de Stock Vigente
-            </button>
-            <button type="submit" className="btn ">
+            </button> */}
+            <button type="submit" className="btn " onClick={onSubmit}>
               Registro
             </button>
           </div>

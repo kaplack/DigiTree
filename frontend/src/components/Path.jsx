@@ -37,7 +37,7 @@ function Path({ titulo, pagina }) {
         ) : (
           titulo // En caso de que el título no se encuentre
         )}{" "}
-        &gt; {pagina}
+        {pagina && <>&gt; {pagina}</>}
       </p>
     </div>
   );

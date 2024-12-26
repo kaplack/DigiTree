@@ -39,7 +39,17 @@ const IngresoMedicamento = () => {
   const onSubmit = (e) => {
     e.preventDefault();
 
-    dispatch(createMed(formData));
+    dispatch(createMed(formData)).then(() => {
+      setFormData({
+        medicamento: "",
+        codigoItem: "",
+        almacen: "",
+        codigoAlmacen: "",
+        ubigeoAlmacen: "",
+        codigoFarmacia: "",
+        ubigeoFarmacia: "",
+      });
+    });
     console.log("Datos del formulario:", formData);
   };
 

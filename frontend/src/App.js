@@ -32,6 +32,7 @@ import Compra from "./pages/compras/Compra";
 import Distribucion from "./pages/distribucion/Distribucion";
 import Estimaciones from "./pages/estimaciones/Estimaciones";
 import Redistribucion from "./pages/redistribucion/Redistribucion";
+import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
   return (
@@ -47,94 +48,187 @@ function App() {
             {/* CONSULTA **********************************************************************/}
 
             <Route path="consultas" element={<Consulta />}></Route>
-            <Route path="consulta/stock" element={<Stock />}></Route>
+            <Route
+              path="consulta/stock"
+              element={
+                <PrivateRoute>
+                  <Stock />
+                </PrivateRoute>
+              }
+            ></Route>
             <Route
               path="consulta/ubicacionvencimiento"
-              element={<UbicacionVencimiento />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <UbicacionVencimiento />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="consulta/trazabilidad"
-              element={<Trazabilidad />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <Trazabilidad />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="consulta/marcos-contractuales"
-              element={<MarcosContractuales />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <MarcosContractuales />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="consulta/proveedores"
-              element={<Proveedores />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <Proveedores />
+                </PrivateRoute>
+              }
+            />
 
             {/* COMPRAS **********************************************************************/}
             <Route path="compras" element={<Compra />}></Route>
             <Route
               path="compras/regulares"
-              element={<ComprasRegulares />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ComprasRegulares />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="compras/automaticas"
-              element={<ComprasAutomaticas />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ComprasAutomaticas />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="compras/configuracion"
-              element={<Configuracion />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <Configuracion />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="compras/estadisticas"
-              element={<Estadistica />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <Estadistica />
+                </PrivateRoute>
+              }
+            />
 
             {/* Distribución **********************************************************************/}
             <Route path="distribucion" element={<Distribucion />}></Route>
             <Route
               path="distribucion/ingresomedicamentos"
-              element={<IngresoMedicamentos />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <IngresoMedicamentos />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="distribucion/salidademedicamentos"
-              element={<SalidaMedicamento />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <SalidaMedicamento />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="distribucion/contabilizaciones"
-              element={<Contabilizaciones />}
-            ></Route>
-            <Route path="distribucion/reportes" element={<Reportes />}></Route>
+              element={
+                <PrivateRoute>
+                  <Contabilizaciones />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="distribucion/reportes"
+              element={
+                <PrivateRoute>
+                  <Reportes />
+                </PrivateRoute>
+              }
+            />
 
             {/* Re-Distribución **********************************************************************/}
             <Route path="redistribucion" element={<Redistribucion />}></Route>
             <Route
               path="redistribucion/ingresomedicamentos"
-              element={<ReIngresoMedicamento />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ReIngresoMedicamento />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="redistribucion/salidademedicamentos"
-              element={<ReSalidaMedicamento />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ReSalidaMedicamento />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="redistribucion/contabilizaciones"
-              element={<ReContabilizaciones />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ReContabilizaciones />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="redistribucion/reportes"
-              element={<ReReportes />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <ReReportes />
+                </PrivateRoute>
+              }
+            />
 
             {/* Estimaciones *************************************************************************/}
 
             <Route path="estimaciones" element={<Estimaciones />}></Route>
-            <Route path="estimaciones/analisis" element={<Analisis />}></Route>
+            <Route
+              path="estimaciones/analisis"
+              element={
+                <PrivateRoute>
+                  <Analisis />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="estimaciones/regresiondemanda"
-              element={<RegresionDemanda />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <RegresionDemanda />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="estimaciones/regresionoferta"
-              element={<RegresionOferta />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <RegresionOferta />
+                </PrivateRoute>
+              }
+            />
             <Route
               path="estimaciones/reportes"
-              element={<EstReportes />}
-            ></Route>
+              element={
+                <PrivateRoute>
+                  <EstReportes />
+                </PrivateRoute>
+              }
+            />
 
             {/* <Route
               path="mobile-scanner"

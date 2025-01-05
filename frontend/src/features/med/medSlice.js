@@ -63,16 +63,24 @@ export const createMed = createAsyncThunk(
 //     }
 // })
 
-// //Update job
-// export const updateWork = createAsyncThunk('works/update', async ( workData, thunkAPI) => {
-//     try{
-//         const token = thunkAPI.getState().auth.user.token
-//         return await workService.updateWork(workData, token)
-//     }catch (error){
-//         const message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString()
-//         return thunkAPI.rejectWithValue(message)
-//     }
-// })
+//Update med
+export const updateMed = createAsyncThunk(
+  "med/update",
+  async (medData, thunkAPI) => {
+    try {
+      const token = thunkAPI.getState().auth.user.token;
+      return await medService.updateMed(medData, token);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 // //Delete job
 // export const deleteWork = createAsyncThunk('works/delete', async ( workId, thunkAPI) => {

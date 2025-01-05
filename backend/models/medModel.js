@@ -20,32 +20,22 @@ const medSchema = mongoose.Schema(
     codigoItem: {
       type: String,
       required: true,
-      unique: true,
     },
     almacen: {
       type: String,
-      required: true,
-    },
-    codigoAlmacen: {
-      type: String,
-      required: true,
-    },
-    ubigeoAlmacen: {
-      type: Number,
       required: true,
     },
     codigoFarmacia: {
       type: String,
       required: true,
     },
-    ubigeoFarmacia: {
-      type: Number,
-      required: true,
-    },
+
     stock: {
       type: Number,
     },
-
+    vencimiento: {
+      type: Date,
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       //type: String,

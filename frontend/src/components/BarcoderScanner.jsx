@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { FaQrcode, FaStop, FaBarcode } from "react-icons/fa6";
 import { CiBarcode } from "react-icons/ci";
+import { toast } from "react-toastify";
 
 const BarcodeScanner = ({ formData, setFormData }) => {
   const [isScanning, setIsScanning] = useState(false);
@@ -31,14 +32,47 @@ const BarcodeScanner = ({ formData, setFormData }) => {
             fps: 60, // Velocidad de escaneo
             qrbox: { width: 250, height: 250 }, // Tamaño del área de escaneo
           },
-          (decodedText) => {
+          async (decodedText) => {
             console.log(`Código detectado: ${decodedText}`);
-            document.getElementById("itemCode").value = decodedText; // Colocar el código en el input
-            setFormData({
-              ...formData,
-              codigoItem: decodedText,
-            });
-            scanner.stop().then(() => setIsScanning(false));
+            // Asegúrate de detener el escáner solo si está activo
+            if (decodedText) {
+              console.log("escaneando true");
+              scanner.stop().then(() => setIsScanning(false));
+            }
+            // document.getElementById("itemCode").value = decodedText; // Colocar el código en el input
+            // setFormData({
+            //   ...formData,
+            //   codigoItem: decodedText,
+            // });
+            try {
+              const response = await fetch(
+                `${process.env.REACT_APP_API_URL}/api/med/${decodedText}`,
+                {
+                  method: "GET",
+                  headers: {
+                    //"Content-Type": "application/json",
+                    Authorization: `Bearer ${
+                      JSON.parse(localStorage.getItem("user")).token
+                    }`, // Si usas autenticación
+                  },
+                }
+              );
+              if (response.ok) {
+                const existingMed = await response.json();
+                console.log(existingMed);
+                setFormData({
+                  ...formData,
+                  medicamento: existingMed.medicamento,
+                  codigoItem: decodedText,
+                  vencimiento: existingMed.vencimiento,
+                  almacen: existingMed.almacen,
+                  codigoFarmacia: existingMed.codigoFarmacia,
+                  stock: existingMed.stock,
+                });
+              }
+            } catch (error) {
+              toast.error("Hubo un error al buscar este itemcode");
+            }
           },
           (error) => {
             console.warn(`Error de escaneo: ${error}`);

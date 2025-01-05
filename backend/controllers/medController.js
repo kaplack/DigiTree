@@ -59,6 +59,8 @@ const createMed = asyncHandler(async (req, res) => {
     ubigeoAlmacen,
     codigoFarmacia,
     ubigeoFarmacia,
+    stock,
+    vencimiento,
   } = req.body;
   console.log(req.body);
 
@@ -84,7 +86,9 @@ const createMed = asyncHandler(async (req, res) => {
     ubigeoAlmacen,
     codigoFarmacia,
     ubigeoFarmacia,
+    stock,
     user: req.user.id,
+    vencimiento,
   });
 
   res.status(201).json(med);
@@ -125,71 +129,53 @@ const createMed = asyncHandler(async (req, res) => {
 // @access  Private
 const updateMed = asyncHandler(async (req, res) => {
   // Get works using id in the JWT
-  // const user = await User.findById(req.user.id)
+  console.log("hola del updateMed");
+  const user = await User.findById(req.user.id);
 
-  // if(!user){
-  //     res.status(401)
-  //     throw new Error('User not found or not conected')
-  // }
-
-  const med = await Med.findById(req.body);
-
-  if (!work) {
-    res.status(400);
-    throw new Error("Work not found");
-  }
-
-  if (work.user.toString() !== req.user.id) {
+  if (!user) {
     res.status(401);
-    throw new Error("Not Authorizer");
+    throw new Error(
+      "Usuario no existe o ingrese para actualizar el medicamento"
+    );
   }
 
   const {
-    title,
-    jobCategory,
-    workTime,
-    workWay,
-    experience,
-    qualification,
-    workPay,
-    country,
-    city,
-    workPlace,
-    description,
-    workFunctions,
-    workRequire,
-    contactMail,
-    iDate,
-    fDate,
-    actTime,
-    workStatus,
-    active,
+    medicamento,
+    codigoItem,
+    almacen,
+    codigoAlmacen,
+    ubigeoAlmacen,
+    codigoFarmacia,
+    ubigeoFarmacia,
+    stock,
+    vencimiento,
   } = req.body;
 
-  const updatedWork = await Work.findByIdAndUpdate(
-    req.params.id,
+  // const med = await Med.findOne({ codigoItem });
+
+  // if (!med) {
+  //   res.status(400);
+  //   throw new Error("Medicamento no existe");
+  // }
+
+  // if (med.user.toString() !== req.user.id) {
+  //   res.status(401);
+  //   throw new Error("Not Authorizer");
+  // }
+
+  console.log(stock);
+
+  const updatedWork = await Med.findOneAndUpdate(
+    { codigoItem },
     {
-      title,
-      jobCategory,
-      workTime,
-      workWay,
-      experience,
-      qualification,
-      workPay,
-      country,
-      city,
-      workPlace,
-      description,
-      workFunctions,
-      workRequire,
-      contactMail,
-      iDate,
-      fDate,
-      actTime,
-      workStatus,
-      active,
-      location: workPlace + ", " + city + " - " + country,
-      user: req.user.id,
+      medicamento,
+      almacen,
+      codigoAlmacen,
+      ubigeoAlmacen,
+      codigoFarmacia,
+      ubigeoFarmacia,
+      vencimiento,
+      stock,
     },
     { new: true }
   );
@@ -212,21 +198,22 @@ const updateMed = asyncHandler(async (req, res) => {
 // @desc    Get user works
 // @route   GET /allworks/:id
 // @access  Public
-// const getPublicWork = asyncHandler(async (req,res) => {
+const getMed = asyncHandler(async (req, res) => {
+  const med = await Med.findOne({ codigoItem: req.params.codigoItem });
 
-//     const work = await Work.findById(req.params.id)
-
-//     if(!work){
-//         res.status(400)
-//         throw new Error('Work not found')
-//     }
-//     res.status(200).json(work)
-// })
+  if (!med) {
+    res.status(404);
+    throw new Error("Medicamento no existe");
+  }
+  res.status(200).json(med);
+});
 
 module.exports = {
   // getWorks,
   // getWork,
   createMed,
+  getMed,
+  updateMed,
   // updateWork,
   // deleteWork,
   // getAllWorks,

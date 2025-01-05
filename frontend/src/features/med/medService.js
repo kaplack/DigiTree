@@ -70,29 +70,31 @@ const createMed = async (medData, token) => {
 //     return response.data
 // }
 
-// // Create new work
+// Update med
 
-// const updateWork = async (workData, token) => {
-//     const config = {
-//         headers: {
-//             Authorization: `Bearer ${token}`
-//         }
-//     }
-//     const response = await axios.put(API_URL + workData.id, workData, config)
+const updateMed = async (medData, token) => {
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  console.log(API_URL + medData.codigoItem);
+  const response = await axios.put(API_URL, medData, config);
 
-//     return response.data
-// }
+  return response.data;
+};
 
-// // Get all works posts
+// Get all works posts
 
-// const getAllWorks = async () => {
-//     const response = await axios.get(PUBLIC_API_URL)
+const getAllWorks = async () => {
+  const response = await axios.get(PUBLIC_API_URL);
 
-//     return response.data
-// }
+  return response.data;
+};
 
 const medService = {
   createMed,
+  updateMed,
   // getWorks,
   // getWork,
   // updateWork,

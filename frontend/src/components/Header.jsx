@@ -219,7 +219,7 @@ function Header() {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     to="distribucion/contabilizaciones"
                   >
-                    Contabilizaiones
+                    Contabilizaciones
                   </Link>
                 </li>
                 <li>
@@ -268,7 +268,7 @@ function Header() {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     to="redistribucion/contabilizaciones"
                   >
-                    Contabilizaiones
+                    Contabilizaciones
                   </Link>
                 </li>
                 <li>

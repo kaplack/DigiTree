@@ -4,6 +4,7 @@ import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
 import { createMed, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
+import { consultaFetch } from "../../app/utils";
 
 const SalidaMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,86 +51,69 @@ const SalidaMedicamento = () => {
 
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/med/${formData.codigoItem}`,
-        {
-          method: "GET",
-          headers: {
-            //"Content-Type": "application/json",
-            Authorization: `Bearer ${
-              JSON.parse(localStorage.getItem("user")).token
-            }`, // Si usas autenticación
-          },
-        }
+      const response = await consultaFetch(
+        process.env.REACT_APP_API_URL +
+          "/api/med/" +
+          formData.codigoItem +
+          "/" +
+          formData.codigoFarmacia,
+        JSON.parse(localStorage.getItem("user")).token
       );
+      console.log(response);
 
       if (response.ok) {
         const existingMed = await response.json();
-        console.log("existente", existingMed.stock + 1);
+        if (existingMed.stock > 0) {
+          console.log("existente", existingMed.stock + 1);
 
-        const updateFormData = {
-          ...formData,
-          stock: existingMed.stock > 0 ? existingMed.stock - 1 : 0,
-        };
-        setFormData(updateFormData);
+          const updateFormData = {
+            ...formData,
+            stock: existingMed.stock - 1,
+          };
+          setFormData(updateFormData);
 
-        console.log("formData Actualizado", updateFormData);
+          console.log("formData Actualizado", updateFormData);
 
-        dispatch(updateMed(updateFormData)).then(() => {
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
+          dispatch(updateMed(updateFormData)).then(() => {
+            setFormData({
+              medicamento: "",
+              codigoItem: "",
+              almacen: "",
+              codigoAlmacen: "",
+              ubigeoAlmacen: "",
+              codigoFarmacia: "",
+              ubigeoFarmacia: "",
+              stock: "",
+              vencimiento: "",
+            });
+            console.log("Medicamento actualizado:", formData);
           });
-          console.log("Medicamento actualizado:", formData);
-        });
-      } else if (response.status === 404) {
-        //Si no existe, crea el nuevo medicamento
-        dispatch(createMed(formData)).then(() => {
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
-          });
-        });
-        console.log("Nuevo medicamento registrado:", formData);
+        } else {
+          throw new Error("El Stock es 0.");
+        }
       } else {
-        throw new Error("Error al verificar el medicamento");
+        throw new Error(
+          "Hubo un error al actualizar el medicamento en la farmacia designada."
+        );
       }
     } catch (error) {
       toast.error(
-        "Hubo un error al registrar el medicamento. Por favor, inténtelo nuevamente."
+        "Hubo un error al actualizar el medicamento. Por favor, inténtelo nuevamente."
       );
-      console.error("Error al registrar el medicamento:", error);
+      console.error("Error al actualizar el medicamento:", error);
     }
   };
 
   const getReporte = async () => {
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/med/${formData.codigoItem}`,
-        {
-          method: "GET",
-          headers: {
-            //"Content-Type": "application/json",
-            Authorization: `Bearer ${
-              JSON.parse(localStorage.getItem("user")).token
-            }`, // Si usas autenticación
-          },
-        }
+      const response = await consultaFetch(
+        process.env.REACT_APP_API_URL +
+          "/api/med/" +
+          formData.codigoItem +
+          "/" +
+          formData.codigoFarmacia,
+        JSON.parse(localStorage.getItem("user")).token
       );
       if (response.ok) {
         const InformeStock = await response.json();

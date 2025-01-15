@@ -86,11 +86,11 @@ const updateMed = async (medData, token) => {
 
 // Get all works posts
 
-const getAllWorks = async () => {
-  const response = await axios.get(PUBLIC_API_URL);
+// const getAllWorks = async () => {
+//   const response = await axios.get(PUBLIC_API_URL);
 
-  return response.data;
-};
+//   return response.data;
+// };
 
 const medService = {
   createMed,

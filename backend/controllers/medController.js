@@ -151,22 +151,10 @@ const updateMed = asyncHandler(async (req, res) => {
     vencimiento,
   } = req.body;
 
-  // const med = await Med.findOne({ codigoItem });
-
-  // if (!med) {
-  //   res.status(400);
-  //   throw new Error("Medicamento no existe");
-  // }
-
-  // if (med.user.toString() !== req.user.id) {
-  //   res.status(401);
-  //   throw new Error("Not Authorizer");
-  // }
-
   console.log(stock);
 
   const updatedWork = await Med.findOneAndUpdate(
-    { codigoItem },
+    { codigoItem, codigoFarmacia },
     {
       medicamento,
       almacen,
@@ -187,24 +175,40 @@ const updateMed = asyncHandler(async (req, res) => {
 // @route   GET /allworks/
 // @access  Public
 
-// const getAllWorks = asyncHandler(async (req,res) => {
-//     const work = await Work.find()
+const getAllMedsByCode = asyncHandler(async (req, res) => {
+  try {
+    console.log("medController ", req.body);
+    console.log(req.body);
+    const work = await Med.find(req.body);
 
-//     //filtrar solo los elementos necesarios para el JobList
+    //filtrar solo los elementos necesarios para el JobList
 
-//     res.status(200).json(work)
-// })
+    res.status(200).json(work);
+  } catch (error) {
+    toast.error("No se tiene este medicamento registrado en la base de datos.");
+  }
+});
 
 // @desc    Get user works
 // @route   GET /allworks/:id
 // @access  Public
 const getMed = asyncHandler(async (req, res) => {
-  const med = await Med.findOne({ codigoItem: req.params.codigoItem });
+  const { codigoItem, codigoFarmacia } = req.params;
+
+  // Construir el filtro dinámico
+  const filter = { codigoItem };
+  if (codigoFarmacia) {
+    filter.codigoFarmacia = codigoFarmacia;
+  }
+
+  // Realizar la búsqueda
+  const med = await Med.findOne(filter);
 
   if (!med) {
     res.status(404);
-    throw new Error("Medicamento no existe");
+    throw new Error("Medicamento no encontrado");
   }
+
   res.status(200).json(med);
 });
 
@@ -214,6 +218,7 @@ module.exports = {
   createMed,
   getMed,
   updateMed,
+  getAllMedsByCode,
   // updateWork,
   // deleteWork,
   // getAllWorks,

@@ -4,6 +4,8 @@ import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
 import { createMed, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
+import { consultaFetch } from "../../app/utils";
+import axios from "axios";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,18 +52,15 @@ const IngresoMedicamento = () => {
 
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/med/${formData.codigoItem}`,
-        {
-          method: "GET",
-          headers: {
-            //"Content-Type": "application/json",
-            Authorization: `Bearer ${
-              JSON.parse(localStorage.getItem("user")).token
-            }`, // Si usas autenticación
-          },
-        }
+      const response = await consultaFetch(
+        process.env.REACT_APP_API_URL +
+          "/api/med/" +
+          formData.codigoItem +
+          "/" +
+          formData.codigoFarmacia,
+        JSON.parse(localStorage.getItem("user")).token
       );
+      console.log(response);
 
       if (response.ok) {
         const existingMed = await response.json();
@@ -90,8 +89,12 @@ const IngresoMedicamento = () => {
           console.log("Medicamento actualizado:", formData);
         });
       } else if (response.status === 404) {
+        const updateFormData = {
+          ...formData,
+          stock: 1,
+        };
         //Si no existe, crea el nuevo medicamento
-        dispatch(createMed(formData)).then(() => {
+        dispatch(createMed(updateFormData)).then(() => {
           setFormData({
             medicamento: "",
             codigoItem: "",
@@ -119,28 +122,37 @@ const IngresoMedicamento = () => {
   const getReporte = async () => {
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/med/${formData.codigoItem}`,
-        {
-          method: "GET",
-          headers: {
-            //"Content-Type": "application/json",
-            Authorization: `Bearer ${
-              JSON.parse(localStorage.getItem("user")).token
-            }`, // Si usas autenticación
-          },
-        }
+      const response = await axios.post(
+        process.env.REACT_APP_API_URL + "/api/med/meds",
+        { codigoItem: formData.codigoItem }
       );
-      if (response.ok) {
-        const InformeStock = await response.json();
-        setInformeStock([InformeStock]);
+      if (response.data.length > 0) {
+        const InformeStock = response.data;
+        setInformeStock(InformeStock);
         setIsModalOpen(true); // Abre el modal
         console.log(informeStock);
       } else {
-        toast.error("No se encontró información de stock.");
+        toast.error("Esta farmacia no tiene este medicamento en Stock.");
       }
     } catch (error) {
       console.log("error! ", error);
+    }
+  };
+
+  const getAllMeds = async () => {
+    const allMeds = await axios.post(
+      process.env.REACT_APP_API_URL + "/api/med/meds",
+      { codigoFarmacia: formData.codigoFarmacia }
+    );
+    console.log(formData.codigoFarmacia);
+    console.log(allMeds.data);
+    const medsArray = allMeds.data;
+    if (medsArray.length > 0) {
+      setInformeStock(medsArray);
+      setIsModalOpen(true); // Abre el modal
+      //console.log(informeStock);
+    } else {
+      toast.error("Esta farmacia no tiene este medicamento en Stock.");
     }
   };
 
@@ -261,7 +273,14 @@ const IngresoMedicamento = () => {
               className="btn btn-reverse"
               onClick={getReporte}
             >
-              Reporte de Stock Vigente
+              Información Consolidada
+            </button>
+            <button
+              type="button"
+              className="btn btn-reverse"
+              onClick={getAllMeds}
+            >
+              Información Farmacia
             </button>
             <button type="submit" className="btn " onClick={onSubmit}>
               Validar ingreso

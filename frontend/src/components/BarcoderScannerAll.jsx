@@ -4,8 +4,9 @@ import { FaQrcode, FaStop, FaBarcode } from "react-icons/fa6";
 import { CiBarcode } from "react-icons/ci";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../app/utils";
+import axios from "axios";
 
-const BarcodeScanner = ({ formData, setFormData }) => {
+const BarcodeScannerAll = ({ meds, setMeds }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanner, setScanner] = useState(null); // Usar el estado para el escáner
 
@@ -40,30 +41,30 @@ const BarcodeScanner = ({ formData, setFormData }) => {
               console.log("escaneando true");
               scanner.stop().then(() => setIsScanning(false));
             }
-            // document.getElementById("itemCode").value = decodedText; // Colocar el código en el input
-            // setFormData({
-            //   ...formData,
-            //   codigoItem: decodedText,
-            // });
+
             try {
-              const response = await consultaFetch(
-                process.env.REACT_APP_API_URL + "/api/med/" + decodedText,
-                JSON.parse(localStorage.getItem("user")).token
+              // Realizamos la solicitud POST a la API
+              const responseb = await axios.post(
+                process.env.REACT_APP_API_URL + "/api/med/meds",
+                { codigoItem: decodedText }
               );
-              if (response.ok) {
-                const existingMed = await response.json();
-                console.log(existingMed);
-                setFormData({
-                  ...formData,
-                  medicamento: existingMed.medicamento,
-                  codigoItem: decodedText,
-                  vencimiento: existingMed.vencimiento,
-                  almacen: existingMed.almacen,
-                  codigoFarmacia: existingMed.codigoFarmacia,
-                  stock: existingMed.stock,
-                });
+
+              // Accedemos a los datos de la respuesta
+              const existingMed = responseb.data;
+
+              // Mostramos los datos en la consola
+              console.log(existingMed);
+              setMeds(existingMed);
+
+              // Si necesitas realizar algo adicional con los datos:
+              if (existingMed) {
+                console.log("Medicamento encontrado:", existingMed);
               }
             } catch (error) {
+              // Mostramos un mensaje de error en caso de que falle la solicitud
+              console.error("Error al buscar el medicamento:", error);
+
+              // Mostramos una notificación al usuario
               toast.error("Hubo un error al buscar este itemcode");
             }
           },
@@ -112,4 +113,4 @@ const BarcodeScanner = ({ formData, setFormData }) => {
   );
 };
 
-export default BarcodeScanner;
+export default BarcodeScannerAll;

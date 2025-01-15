@@ -5,6 +5,10 @@ const medicamentosSlice = createSlice({
   initialState: [
     { codigo: "7750218001391", nombre: "Dextosec" },
     { codigo: "6957303841899", nombre: "Ugreen usb adapter" },
+    { codigo: "4031626710369", nombre: "Hylo-comod" },
+    { codigo: "8904102205177", nombre: "CITROFLOW K" },
+    { codigo: "8906046202755", nombre: "Digermin" },
+    { codigo: "7750215009901", nombre: "Angidex" },
   ],
   reducers: {
     addMedicamento: (state, action) => {

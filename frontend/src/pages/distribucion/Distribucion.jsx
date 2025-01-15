@@ -19,7 +19,7 @@ function Distribucion() {
         </Link>
         <Link to="/distribucion/contabilizaciones">
           <div className="home-menu__item">
-            <h2>Contabilizaiones</h2>
+            <h2>Contabilizaciones</h2>
           </div>
         </Link>
         <Link to="/distribucion/reportes">

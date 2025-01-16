@@ -10,6 +10,10 @@ import axios from "axios";
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [informeStock, setInformeStock] = useState([]);
+  const meds = useSelector((state) => state.med.allMeds);
+
+  const enTramiteCount =
+    meds?.filter((med) => med.estado === "En Transito").length || 0;
 
   const [formData, setFormData] = useState({
     medicamento: "",
@@ -37,6 +41,11 @@ const IngresoMedicamento = () => {
     stock,
     vencimiento,
   } = formData;
+
+  // const cargarMedTrans = () => {
+  //   const medTrans = meds?.filter((med) => med.estado === "En Transito");
+  //   console.log(medTrans);
+  // };
 
   const dispatch = useDispatch();
 
@@ -196,6 +205,16 @@ const IngresoMedicamento = () => {
           </div>
 
           <BarcodeScanner setFormData={setFormData} formData={formData} />
+
+          {/* {enTramiteCount > 0 ? (
+            <button
+              type="button"
+              className="btn btn-reverse"
+              onClick={cargarMedTrans}
+            >
+              Cargar Medicamento en Transito
+            </button>
+          ) : null} */}
 
           {/* Vencimiento */}
 

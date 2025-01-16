@@ -93,16 +93,24 @@ export const updateMed = createAsyncThunk(
 //     }
 // })
 
-// //Get all job
-// export const getAllWorks = createAsyncThunk('works/getAllWorks', async (_, thunkAPI) => {
-//     try{
-//         //const token = thunkAPI.getState().auth.user.token
-//         return await workService.getAllWorks()
-//     }catch (error){
-//         const message = (error.response && error.response.data && error.response.data.message) || error.message || error.toString()
-//         return thunkAPI.rejectWithValue(message)
-//     }
-// })
+// //Get all meds
+export const getAllMeds = createAsyncThunk(
+  "works/getAllMeds",
+  async (_, thunkAPI) => {
+    try {
+      //const token = thunkAPI.getState().auth.user.token
+      return await medService.getAllMeds();
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 export const medSlice = createSlice({
   name: "med",
@@ -124,29 +132,29 @@ export const medSlice = createSlice({
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
+      })
+      // .addCase(getWorks.pending, (state)=>{
+      //     state.isLoading = true
+      // })
+      // .addCase(getWorks.fulfilled, (state, action)=>{
+      //     state.isLoading = false
+      //     state.isSuccess = true
+      //     state.works = action.payload
+      // })
+      // .addCase(getWorks.rejected, (state, action)=>{
+      //     state.isLoading = false
+      //     state.isError = true
+      //     state.message = action.payload
+      // })
+      // .addCase(getWork.fulfilled, (state, action)=>{
+      //     state.work = action.payload
+      // })
+      // .addCase(getPublicWork.fulfilled, (state, action)=>{
+      //     state.work = action.payload
+      // })
+      .addCase(getAllMeds.fulfilled, (state, action) => {
+        state.allMeds = action.payload;
       });
-    // .addCase(getWorks.pending, (state)=>{
-    //     state.isLoading = true
-    // })
-    // .addCase(getWorks.fulfilled, (state, action)=>{
-    //     state.isLoading = false
-    //     state.isSuccess = true
-    //     state.works = action.payload
-    // })
-    // .addCase(getWorks.rejected, (state, action)=>{
-    //     state.isLoading = false
-    //     state.isError = true
-    //     state.message = action.payload
-    // })
-    // .addCase(getWork.fulfilled, (state, action)=>{
-    //     state.work = action.payload
-    // })
-    // .addCase(getPublicWork.fulfilled, (state, action)=>{
-    //     state.work = action.payload
-    // })
-    // .addCase(getAllWorks.fulfilled, (state, action) => {
-    //     state.allWorks = action.payload
-    // })
   },
 });
 

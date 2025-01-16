@@ -86,11 +86,11 @@ const updateMed = async (medData, token) => {
 
 // Get all works posts
 
-// const getAllWorks = async () => {
-//   const response = await axios.get(PUBLIC_API_URL);
+const getAllMeds = async () => {
+  const response = await axios.post(API_URL + "meds");
 
-//   return response.data;
-// };
+  return response.data;
+};
 
 const medService = {
   createMed,
@@ -99,7 +99,7 @@ const medService = {
   // getWork,
   // updateWork,
   // deleteWork,
-  // getAllWorks,
+  getAllMeds,
   // getPublicWork
 };
 

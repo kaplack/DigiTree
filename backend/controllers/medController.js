@@ -61,6 +61,8 @@ const createMed = asyncHandler(async (req, res) => {
     ubigeoFarmacia,
     stock,
     vencimiento,
+    estado,
+    codigoOrigen,
   } = req.body;
   console.log(req.body);
 
@@ -89,6 +91,8 @@ const createMed = asyncHandler(async (req, res) => {
     stock,
     user: req.user.id,
     vencimiento,
+    estado,
+    codigoOrigen,
   });
 
   res.status(201).json(med);
@@ -149,6 +153,8 @@ const updateMed = asyncHandler(async (req, res) => {
     ubigeoFarmacia,
     stock,
     vencimiento,
+    estado,
+    codigoOrigen,
   } = req.body;
 
   console.log(stock);
@@ -164,6 +170,8 @@ const updateMed = asyncHandler(async (req, res) => {
       ubigeoFarmacia,
       vencimiento,
       stock,
+      estado,
+      codigoOrigen,
     },
     { new: true }
   );

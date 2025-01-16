@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Path from "../../components/Path";
 import BarcodeScannerAll from "../../components/BarcoderScannerAll";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, updateMed } from "../../features/med/medSlice";
+import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
 
@@ -84,9 +84,12 @@ const ReIngresoMedicamento = () => {
         const updateDestino = {
           ...dataResponse,
           stock: dataResponse.stock + 1,
+          codigoOrigen: formData.codigoOrigen,
+          estado: "En Transito",
         };
 
         dispatch(updateMed(updateDestino)).then(() => {
+          dispatch(getAllMeds());
           setFormData({
             medicamento: "",
             codigoItem: "",
@@ -103,6 +106,7 @@ const ReIngresoMedicamento = () => {
 
         console.log("Destino actualizado", updateDestino);
       } else if (response.status === 404) {
+        // si el medicamento no existe en la farmacia
         // Actualiza origen
         const origen = meds.find(
           (item) => item.codigoFarmacia === formData.codigoOrigen
@@ -125,6 +129,8 @@ const ReIngresoMedicamento = () => {
           vencimiento: origen.vencimiento,
           stock: 1,
           codigoFarmacia: formData.codigoFarmacia,
+          codigoOrigen: formData.codigoOrigen,
+          estado: "En Transito",
         };
 
         dispatch(createMed(NewDestino)).then(() => {

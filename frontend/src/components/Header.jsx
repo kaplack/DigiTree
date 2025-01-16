@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FaSignInAlt,
   FaSignOutAlt,
@@ -10,10 +10,12 @@ import {
   FaAmbulance,
   FaRecycle,
   FaChartLine,
+  FaBell,
 } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, reset } from "../features/auth/authSlice";
+import { getAllMeds } from "../features/med/medSlice";
 
 function Header() {
   const navigate = useNavigate();
@@ -21,12 +23,19 @@ function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const { user } = useSelector((state) => state.auth);
+  const meds = useSelector((state) => state.med.allMeds);
+
+  // const enTramiteCount =
+  //   meds?.filter((med) => med.estado === "En Transito").length || 0;
 
   const onLogout = () => {
     dispatch(logout());
     dispatch(reset());
     navigate("/");
   };
+  useEffect(() => {
+    dispatch(getAllMeds());
+  }, []);
 
   const handleMenuToggle = (index) => {
     setActiveMenu((prev) => (prev === index ? null : index));
@@ -44,6 +53,10 @@ function Header() {
       <ul className="auth-links">
         {user ? (
           <>
+            {/* <li className="user">
+              <FaBell />
+              <span className="user__name">{enTramiteCount}</span>
+            </li> */}
             <li className="user">
               <FaUser />
               <span className="user__name">{user.email.split("@")[0]}</span>

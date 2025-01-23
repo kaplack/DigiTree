@@ -118,6 +118,7 @@ h3 {
 
 .form-group {
   margin-bottom: 10px;
+  position: relative;
 }
 
 .form-group input,
@@ -811,4 +812,12 @@ footer {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+/* basrcode search ***************************************************************************/
+
+.search-icon {
+  position: absolute;
+  top: 2.2rem;
+  right: 1rem;
 }

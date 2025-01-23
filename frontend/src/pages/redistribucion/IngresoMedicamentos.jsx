@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Path from "../../components/Path";
 import BarcodeScannerAll from "../../components/BarcoderScannerAll";
 import { useDispatch, useSelector } from "react-redux";
 import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
+import axios from "axios";
 
 const ReIngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,6 +40,14 @@ const ReIngresoMedicamento = () => {
       }));
     }
   }, [meds]);
+
+  const barcodeInputRef = useRef(null);
+  useEffect(() => {
+    // Enfoca automáticamente el input al cargar la página
+    if (barcodeInputRef.current) {
+      barcodeInputRef.current.focus();
+    }
+  }, []);
 
   const onChange = (e) => {
     setFormData({
@@ -157,21 +166,13 @@ const ReIngresoMedicamento = () => {
   const getReporte = async () => {
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/api/med/${formData.codigoItem}/${formData.codigoFarmacia}`,
-        {
-          method: "GET",
-          headers: {
-            //"Content-Type": "application/json",
-            Authorization: `Bearer ${
-              JSON.parse(localStorage.getItem("user")).token
-            }`, // Si usas autenticación
-          },
-        }
+      const response = await axios.post(
+        process.env.REACT_APP_API_URL + "/api/med/meds",
+        { codigoItem: formData.codigoItem }
       );
-      if (response.ok) {
-        const InformeStock = await response.json();
-        setInformeStock([InformeStock]);
+      if (response.data.length > 0) {
+        const InformeStock = response.data;
+        setInformeStock(InformeStock);
         setIsModalOpen(true); // Abre el modal
         console.log(informeStock);
       } else {
@@ -186,6 +187,41 @@ const ReIngresoMedicamento = () => {
     setIsModalOpen(false); // Cierra el modal
     setInformeStock(null);
   };
+
+  const handleKeyDown = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita que el formulario se envíe si está en un form
+      //console.log("Código escaneado:", barcode);
+
+      // Aquí haces la llamada Axios para obtener los datos
+      try {
+        // Realizamos la solicitud POST a la API
+        const responseb = await axios.post(
+          process.env.REACT_APP_API_URL + "/api/med/meds",
+          { codigoItem: formData.codigoItem }
+        );
+
+        // Accedemos a los datos de la respuesta
+        const existingMed = responseb.data;
+
+        // Mostramos los datos en la consola
+        console.log(existingMed);
+        setMeds(existingMed);
+
+        // Si necesitas realizar algo adicional con los datos:
+        if (existingMed) {
+          console.log("Medicamento encontrado:", existingMed);
+        }
+      } catch (error) {
+        // Mostramos un mensaje de error en caso de que falle la solicitud
+        console.error("Error al buscar el medicamento:", error);
+
+        // Mostramos una notificación al usuario
+        toast.error("Hubo un error al buscar este itemcode");
+      }
+    }
+  };
+
   return (
     <>
       <Path titulo={"Redistribución"} pagina={"Reasignación de Medicamentos"} />
@@ -211,6 +247,7 @@ const ReIngresoMedicamento = () => {
           <div className="form-group" id="scan-section">
             <label htmlFor="itemCode">Código de Ítem (Unidad / Lote)</label>
             <input
+              ref={barcodeInputRef}
               type="text"
               id="itemCode"
               name="codigoItem"
@@ -218,6 +255,7 @@ const ReIngresoMedicamento = () => {
               placeholder="Ingrese el código"
               onChange={onChange}
               value={formData?.codigoItem}
+              onKeyDown={handleKeyDown}
             />
           </div>
 
@@ -255,7 +293,7 @@ const ReIngresoMedicamento = () => {
                   );
                 })}
             </select>
-            {formData.codigoFarmacia && (
+            {formData.codigoOrigen && (
               <p>
                 Código de Farmacia:{" "}
                 {
@@ -302,7 +340,7 @@ const ReIngresoMedicamento = () => {
               className="btn btn-reverse"
               onClick={getReporte}
             >
-              Reporte de Stock Vigente
+              Información consolidada
             </button>
             <button type="submit" className="btn " onClick={onSubmit}>
               Reasignar

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,6 +36,14 @@ const SalidaMedicamento = () => {
     stock,
     vencimiento,
   } = formData;
+
+  const barcodeInputRef = useRef(null);
+  useEffect(() => {
+    // Enfoca automáticamente el input al cargar la página
+    if (barcodeInputRef.current) {
+      barcodeInputRef.current.focus();
+    }
+  }, []);
 
   const dispatch = useDispatch();
 
@@ -133,6 +141,36 @@ const SalidaMedicamento = () => {
     setInformeStock(null);
   };
 
+  const handleKeyDown = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita que el formulario se envíe si está en un form
+      //console.log("Código escaneado:", barcode);
+
+      // Aquí haces la llamada Axios para obtener los datos
+      try {
+        const response = await consultaFetch(
+          process.env.REACT_APP_API_URL + "/api/med/" + formData.codigoItem,
+          JSON.parse(localStorage.getItem("user")).token
+        );
+        if (response.ok) {
+          const existingMed = await response.json();
+          console.log(existingMed);
+          setFormData({
+            ...formData,
+            medicamento: existingMed.medicamento,
+            codigoItem: formData.codigoItem,
+            vencimiento: existingMed.vencimiento,
+            almacen: existingMed.almacen,
+            codigoFarmacia: existingMed.codigoFarmacia,
+            stock: existingMed.stock,
+          });
+        }
+      } catch (error) {
+        toast.error("Hubo un error al buscar este itemcode");
+      }
+    }
+  };
+
   return (
     <>
       <Path titulo={"Distribución"} pagina={"Salida de Medicamentos"} />
@@ -158,6 +196,7 @@ const SalidaMedicamento = () => {
           <div className="form-group" id="scan-section">
             <label htmlFor="itemCode">Código de Ítem (Unidad / Lote)</label>
             <input
+              ref={barcodeInputRef}
               type="text"
               id="itemCode"
               name="codigoItem"
@@ -165,6 +204,7 @@ const SalidaMedicamento = () => {
               placeholder="Ingrese el código"
               onChange={onChange}
               value={formData.codigoItem}
+              onKeyDown={handleKeyDown}
             />
           </div>
 

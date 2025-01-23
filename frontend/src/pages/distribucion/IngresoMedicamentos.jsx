@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,6 +6,7 @@ import { createMed, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
 import axios from "axios";
+import { FaSearch } from "react-icons/fa";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +42,14 @@ const IngresoMedicamento = () => {
     stock,
     vencimiento,
   } = formData;
+
+  const barcodeInputRef = useRef(null);
+  useEffect(() => {
+    // Enfoca automáticamente el input al cargar la página
+    if (barcodeInputRef.current) {
+      barcodeInputRef.current.focus();
+    }
+  }, []);
 
   // const cargarMedTrans = () => {
   //   const medTrans = meds?.filter((med) => med.estado === "En Transito");
@@ -169,6 +178,37 @@ const IngresoMedicamento = () => {
     setIsModalOpen(false); // Cierra el modal
     setInformeStock(null);
   };
+
+  const handleKeyDown = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Evita que el formulario se envíe si está en un form
+      //console.log("Código escaneado:", barcode);
+
+      // Aquí haces la llamada Axios para obtener los datos
+      try {
+        const response = await consultaFetch(
+          process.env.REACT_APP_API_URL + "/api/med/" + formData.codigoItem,
+          JSON.parse(localStorage.getItem("user")).token
+        );
+        if (response.ok) {
+          const existingMed = await response.json();
+          console.log(existingMed);
+          setFormData({
+            ...formData,
+            medicamento: existingMed.medicamento,
+            codigoItem: formData.codigoItem,
+            vencimiento: existingMed.vencimiento,
+            almacen: existingMed.almacen,
+            codigoFarmacia: existingMed.codigoFarmacia,
+            stock: existingMed.stock,
+          });
+        }
+      } catch (error) {
+        toast.error("Hubo un error al buscar este itemcode");
+      }
+    }
+  };
+
   return (
     <>
       <Path titulo={"Distribución"} pagina={"Ingreso de Medicamentos"} />
@@ -194,6 +234,7 @@ const IngresoMedicamento = () => {
           <div className="form-group" id="scan-section">
             <label htmlFor="itemCode">Código de Ítem (Unidad / Lote)</label>
             <input
+              ref={barcodeInputRef}
               type="text"
               id="itemCode"
               name="codigoItem"
@@ -201,7 +242,9 @@ const IngresoMedicamento = () => {
               placeholder="Ingrese el código"
               onChange={onChange}
               value={formData.codigoItem}
+              onKeyDown={handleKeyDown}
             />
+            {/* <FaSearch className="search-icon" /> */}
           </div>
 
           <BarcodeScanner setFormData={setFormData} formData={formData} />

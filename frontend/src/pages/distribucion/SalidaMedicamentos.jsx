@@ -24,6 +24,7 @@ const SalidaMedicamento = () => {
 
   const drugstore = useSelector((state) => state.drugstore);
   const warehouse = useSelector((state) => state.warehouse);
+  const { allMeds } = useSelector((state) => state.med);
 
   const {
     medicamento,
@@ -61,7 +62,7 @@ const SalidaMedicamento = () => {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
       const response = await consultaFetch(
         process.env.REACT_APP_API_URL +
-          "/api/med/" +
+          "/api/med/meds/" +
           formData.codigoItem +
           "/" +
           formData.codigoFarmacia,
@@ -117,7 +118,7 @@ const SalidaMedicamento = () => {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
       const response = await consultaFetch(
         process.env.REACT_APP_API_URL +
-          "/api/med/" +
+          "/api/med/meds/" +
           formData.codigoItem +
           "/" +
           formData.codigoFarmacia,
@@ -145,28 +146,32 @@ const SalidaMedicamento = () => {
     if (e.key === "Enter") {
       e.preventDefault(); // Evita que el formulario se envíe si está en un form
       //console.log("Código escaneado:", barcode);
-
-      // Aquí haces la llamada Axios para obtener los datos
-      try {
-        const response = await consultaFetch(
-          process.env.REACT_APP_API_URL + "/api/med/" + formData.codigoItem,
-          JSON.parse(localStorage.getItem("user")).token
-        );
-        if (response.ok) {
-          const existingMed = await response.json();
-          console.log(existingMed);
+      const items = allMeds.filter((e) => e.codigoItem === formData.codigoItem);
+      console.log(items);
+      if (items.length > 0) {
+        const item = items.filter((e) => e.codigoFarmacia === "00060")[0];
+        console.log(item);
+        if (item) {
           setFormData({
             ...formData,
-            medicamento: existingMed.medicamento,
-            codigoItem: formData.codigoItem,
-            vencimiento: existingMed.vencimiento,
-            almacen: existingMed.almacen,
-            codigoFarmacia: existingMed.codigoFarmacia,
-            stock: existingMed.stock,
+            medicamento: item.medicamento,
+            codigoItem: item.codigoItem,
+            vencimiento: item.vencimiento,
+            almacen: item.almacen,
+            codigoFarmacia: item.codigoFarmacia,
+            stock: item.stock,
+          });
+        } else {
+          setFormData({
+            ...formData,
+            medicamento: items[0].medicamento,
+            codigoItem: items[0].codigoItem,
+            vencimiento: items[0].vencimiento,
+            almacen: items[0].almacen,
+            codigoFarmacia: items[0].codigoFarmacia,
+            stock: items[0].stock,
           });
         }
-      } catch (error) {
-        toast.error("Hubo un error al buscar este itemcode");
       }
     }
   };
@@ -229,7 +234,7 @@ const SalidaMedicamento = () => {
             <label htmlFor="farmaciaSelect">Farmacia:</label>
             <select
               id="farmaciaSelect"
-              value={formData.codigoFarmacia}
+              value={formData.codigoFarmacia || "00060"}
               onChange={onChange}
               name="codigoFarmacia"
             >

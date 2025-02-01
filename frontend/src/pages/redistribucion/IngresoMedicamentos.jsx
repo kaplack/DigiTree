@@ -6,6 +6,11 @@ import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
 import axios from "axios";
+import {
+  createTranfer,
+  getTransfer,
+} from "../../features/transfer/transfSlice";
+import { set } from "mongoose";
 
 const ReIngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,6 +33,7 @@ const ReIngresoMedicamento = () => {
 
   const drugstore = useSelector((state) => state.drugstore);
   const warehouse = useSelector((state) => state.warehouse);
+  const { user } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
@@ -58,108 +64,51 @@ const ReIngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    const origen = meds.find(
+      (item) => item.codigoFarmacia === formData.codigoOrigen
+    );
+    //console.log(origen);
 
-    //consulta si la farmacia destino existe
-    if (formData.codigoFarmacia && formData.codigoOrigen) {
-      const response = await consultaFetch(
-        process.env.REACT_APP_API_URL +
-          "/api/med/" +
-          formData.codigoItem +
-          "/" +
-          formData.codigoFarmacia,
-        JSON.parse(localStorage.getItem("user")).token
-      );
-      const dataResponse = await response.json();
-      console.log(dataResponse);
+    const updateOrigen = {
+      ...origen,
+      stock: origen.stock - 1,
+    };
 
-      //manejo de respuesta
-      if (response.ok) {
-        // funcion updateMed para Actualizar aumentando en uno el stock de la farmacia destino
+    // funcion updateMed para Actualizar aumenta en uno el stock de la farmacia origen
+    try {
+      dispatch(updateMed(updateOrigen));
+      console.log("Origen Actualizado:", updateOrigen);
+    } catch (error) {
+      console.log(error);
+    }
 
-        const origen = meds.find(
-          (item) => item.codigoFarmacia === formData.codigoOrigen
-        );
-        console.log(origen);
+    const transfer = {
+      codigoItem: formData.codigoItem,
+      codigoDestino: formData.codigoFarmacia,
+      codigoOrigen: formData.codigoOrigen,
+      estado: "En Tránsito",
+    };
 
-        const updateOrigen = {
-          ...origen,
-          stock: origen.stock - 1,
-        };
-
-        // funcion updateMed para Actualizar disminye en uno el stock de la farmacia origen
-        dispatch(updateMed(updateOrigen));
-        console.log("Origen Actualizado:", updateOrigen);
-
-        const updateDestino = {
-          ...dataResponse,
-          stock: dataResponse.stock + 1,
-          codigoOrigen: formData.codigoOrigen,
-          estado: "En Transito",
-        };
-
-        dispatch(updateMed(updateDestino)).then(() => {
-          dispatch(getAllMeds());
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
-            codigoOrigen: "",
-          });
-        });
-
-        console.log("Destino actualizado", updateDestino);
-      } else if (response.status === 404) {
-        // si el medicamento no existe en la farmacia
-        // Actualiza origen
-        const origen = meds.find(
-          (item) => item.codigoFarmacia === formData.codigoOrigen
-        );
-        console.log(origen);
-
-        const updateOrigen = {
-          ...origen,
-          stock: origen.stock - 1,
-        };
-        dispatch(updateMed(updateOrigen));
-        console.log("Origen Actualizado:", updateOrigen);
-
-        //Crea Destino
-        console.log("crear nuevo registro");
-        const NewDestino = {
-          almacen: origen.almacen,
-          codigoItem: origen.codigoItem,
-          medicamento: origen.medicamento,
-          vencimiento: origen.vencimiento,
-          stock: 1,
-          codigoFarmacia: formData.codigoFarmacia,
-          codigoOrigen: formData.codigoOrigen,
-          estado: "En Transito",
-        };
-
-        dispatch(createMed(NewDestino)).then(() => {
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
-            codigoOrigen: "",
-          });
-        });
-        console.log("Nuevo medicamento registrado:", NewDestino);
-      } else {
-        throw new Error("Error al verificar el medicamento");
-      }
+    try {
+      dispatch(createTranfer(transfer)).then(() => {
+        console.log("transfer creado");
+        setFormData({
+          medicamento: "",
+          codigoItem: "",
+          almacen: "",
+          codigoAlmacen: "",
+          ubigeoAlmacen: "",
+          codigoFarmacia: "",
+          ubigeoFarmacia: "",
+          stock: 0,
+          vencimiento: "",
+          codigoOrigen: "",
+        }); // Limpia el formulario
+        setMeds([]); // Limpia los medicamentos
+        dispatch(getTransfer());
+      });
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -205,12 +154,20 @@ const ReIngresoMedicamento = () => {
         const existingMed = responseb.data;
 
         // Mostramos los datos en la consola
-        console.log(existingMed);
+        //console.log(existingMed);
         setMeds(existingMed);
+        setFormData({
+          ...formData,
+          medicamento: existingMed[0]?.medicamento || "",
+        });
 
         // Si necesitas realizar algo adicional con los datos:
-        if (existingMed) {
+        if (existingMed.length > 0) {
           console.log("Medicamento encontrado:", existingMed);
+        } else {
+          toast.error(
+            "No se encontró el medicamento, verifique el código de barras"
+          );
         }
       } catch (error) {
         // Mostramos un mensaje de error en caso de que falle la solicitud

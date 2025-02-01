@@ -2,10 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, updateMed } from "../../features/med/medSlice";
+import { getMeds } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
-import { consultaFetch } from "../../app/utils";
-import axios from "axios";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,29 +12,14 @@ const IngresoMedicamento = () => {
   const [formData, setFormData] = useState({
     medicamento: "",
     codigoItem: "",
-    almacen: "",
-    codigoAlmacen: "",
-    ubigeoAlmacen: "",
     codigoFarmacia: "",
-    ubigeoFarmacia: "",
-    stock: 0,
-    vencimiento: "",
   });
 
   const drugstore = useSelector((state) => state.drugstore);
-  const warehouse = useSelector((state) => state.warehouse);
+  //const warehouse = useSelector((state) => state.warehouse);
+  const { allMeds } = useSelector((state) => state.med);
 
-  const {
-    medicamento,
-    codigoItem,
-    almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
-    codigoFarmacia,
-    ubigeoFarmacia,
-    stock,
-    vencimiento,
-  } = formData;
+  const { medicamento, codigoItem, codigoFarmacia } = formData;
 
   const barcodeInputRef = useRef(null);
   useEffect(() => {
@@ -44,6 +27,10 @@ const IngresoMedicamento = () => {
     if (barcodeInputRef.current) {
       barcodeInputRef.current.focus();
     }
+    setFormData((prevData) => ({
+      ...prevData,
+      codigoFarmacia: "00060",
+    }));
   }, []);
 
   const dispatch = useDispatch();
@@ -55,40 +42,31 @@ const IngresoMedicamento = () => {
     });
   };
 
-  const getReporte = async () => {
-    try {
-      // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await axios.post(
-        process.env.REACT_APP_API_URL + "/api/med/meds",
-        { codigoItem: formData.codigoItem }
-      );
-      if (response.data.length > 0) {
-        const InformeStock = response.data;
-        setInformeStock(InformeStock);
-        setIsModalOpen(true); // Abre el modal
-        console.log(informeStock);
-      } else {
-        toast.error("Esta farmacia no tiene este medicamento en Stock.");
+  const getMedReport = async () => {
+    if (formData.codigoItem === "") {
+      return toast.error("Ingrese un código de ítem válido.");
+    } else {
+      try {
+        dispatch(getMeds({ codigoItem: codigoItem })).then((data) => {
+          //console.log("Medicamento encontrado", data.payload);
+          setInformeStock(data.payload);
+          setIsModalOpen(true); // Abre el modal
+          //console.log(informeStock);
+        });
+      } catch (error) {
+        console.log("error", error);
       }
-    } catch (error) {
-      console.log("error! ", error);
     }
   };
 
-  const getAllMeds = async () => {
-    const allMeds = await axios.post(
-      process.env.REACT_APP_API_URL + "/api/med/meds",
-      { codigoFarmacia: formData.codigoFarmacia }
-    );
-    console.log(formData.codigoFarmacia);
-    console.log(allMeds.data);
-    const medsArray = allMeds.data;
-    if (medsArray.length > 0) {
-      setInformeStock(medsArray);
-      setIsModalOpen(true); // Abre el modal
-      //console.log(informeStock);
-    } else {
-      toast.error("Esta farmacia no tiene este medicamento en Stock.");
+  const getPharmacyMeds = () => {
+    try {
+      dispatch(getMeds({ codigoFarmacia: codigoFarmacia })).then((data) => {
+        setInformeStock(data.payload);
+        setIsModalOpen(true); // Abre el modal
+      });
+    } catch (error) {
+      console.log("error! ", error);
     }
   };
 
@@ -101,28 +79,32 @@ const IngresoMedicamento = () => {
     if (e.key === "Enter") {
       e.preventDefault(); // Evita que el formulario se envíe si está en un form
       //console.log("Código escaneado:", barcode);
-
-      // Aquí haces la llamada Axios para obtener los datos
-      try {
-        const response = await consultaFetch(
-          process.env.REACT_APP_API_URL + "/api/med/" + formData.codigoItem,
-          JSON.parse(localStorage.getItem("user")).token
-        );
-        if (response.ok) {
-          const existingMed = await response.json();
-          console.log(existingMed);
+      const items = allMeds.filter((e) => e.codigoItem === formData.codigoItem);
+      console.log(items);
+      if (items.length > 0) {
+        const item = items.filter((e) => e.codigoFarmacia === "00060")[0];
+        console.log(item);
+        if (item) {
           setFormData({
             ...formData,
-            medicamento: existingMed.medicamento,
-            codigoItem: formData.codigoItem,
-            vencimiento: existingMed.vencimiento,
-            almacen: existingMed.almacen,
-            codigoFarmacia: existingMed.codigoFarmacia,
-            stock: existingMed.stock,
+            medicamento: item.medicamento,
+            codigoItem: item.codigoItem,
+            vencimiento: item.vencimiento,
+            almacen: item.almacen,
+            codigoFarmacia: item.codigoFarmacia,
+            stock: item.stock,
+          });
+        } else {
+          setFormData({
+            ...formData,
+            medicamento: items[0].medicamento,
+            codigoItem: items[0].codigoItem,
+            vencimiento: items[0].vencimiento,
+            almacen: items[0].almacen,
+            codigoFarmacia: items[0].codigoFarmacia,
+            stock: items[0].stock,
           });
         }
-      } catch (error) {
-        toast.error("Hubo un error al buscar este itemcode");
       }
     }
   };
@@ -171,7 +153,7 @@ const IngresoMedicamento = () => {
             <label htmlFor="farmaciaSelect">Farmacia:</label>
             <select
               id="farmaciaSelect"
-              value={formData.codigoFarmacia}
+              value={formData.codigoFarmacia || "00060"}
               onChange={onChange}
               name="codigoFarmacia"
             >
@@ -195,42 +177,16 @@ const IngresoMedicamento = () => {
             )}
           </div>
 
-          {/* Nombre de Almacén*/}
-          {/* <div className="form-group">
-            <label htmlFor="warehouseSelect">Almacén:</label>
-            <select
-              id="warehouseSelect"
-              value={formData.almacen}
-              onChange={onChange}
-              name="almacen"
-            >
-              <option value="" disabled>
-                Seleccione un almacén
-              </option>
-              {warehouse.map((almacen) => (
-                <option key={almacen.codigo} value={almacen.codigo}>
-                  {almacen.nombre}
-                </option>
-              ))}
-            </select>
-            {formData.almacen && (
-              <p>
-                Almacén seleccionado:{" "}
-                {warehouse.find((w) => w.codigo === formData.almacen)?.codigo}
-              </p>
-            )}
-          </div> */}
-
           {/* Botones */}
           <div className="form-buttons">
             <button
               type="button"
               className="btn btn-reverse"
-              onClick={getReporte}
+              onClick={getMedReport}
             >
               Información Consolidada
             </button>
-            <button type="button" className="btn" onClick={getAllMeds}>
+            <button type="button" className="btn" onClick={getPharmacyMeds}>
               Información Farmacia
             </button>
           </div>

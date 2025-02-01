@@ -190,7 +190,7 @@ const getAllMedsByCode = asyncHandler(async (req, res) => {
     const work = await Med.find(req.body);
 
     //filtrar solo los elementos necesarios para el JobList
-
+    console.log("getallMEDS", work);
     res.status(200).json(work);
   } catch (error) {
     toast.error("No se tiene este medicamento registrado en la base de datos.");

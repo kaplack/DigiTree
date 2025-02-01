@@ -2,19 +2,19 @@ import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, updateMed } from "../../features/med/medSlice";
+import { createMed, updateMed, getMeds } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
-import axios from "axios";
-import { FaSearch } from "react-icons/fa";
+import {
+  getTransfer,
+  updateTransfer,
+} from "../../features/transfer/transfSlice";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [informeStock, setInformeStock] = useState([]);
-  const meds = useSelector((state) => state.med.allMeds);
-
-  const enTramiteCount =
-    meds?.filter((med) => med.estado === "En Transito").length || 0;
+  const [informeTransito, setInformeTransito] = useState([]);
+  //const meds = useSelector((state) => state.med.allMeds);
 
   const [formData, setFormData] = useState({
     medicamento: "",
@@ -30,18 +30,8 @@ const IngresoMedicamento = () => {
 
   const drugstore = useSelector((state) => state.drugstore);
   const warehouse = useSelector((state) => state.warehouse);
-
-  const {
-    medicamento,
-    codigoItem,
-    almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
-    codigoFarmacia,
-    ubigeoFarmacia,
-    stock,
-    vencimiento,
-  } = formData;
+  const medsNombres = useSelector((state) => state.medicamento);
+  const { allMeds } = useSelector((state) => state.med);
 
   const barcodeInputRef = useRef(null);
   useEffect(() => {
@@ -49,12 +39,16 @@ const IngresoMedicamento = () => {
     if (barcodeInputRef.current) {
       barcodeInputRef.current.focus();
     }
-  }, []);
+    setFormData((prevData) => ({
+      ...prevData,
+      codigoFarmacia: "00060",
+    }));
 
-  // const cargarMedTrans = () => {
-  //   const medTrans = meds?.filter((med) => med.estado === "En Transito");
-  //   console.log(medTrans);
-  // };
+    dispatch(getTransfer()).then((data) => {
+      setInformeTransito(data.payload);
+      console.log(data.payload);
+    });
+  }, []);
 
   const dispatch = useDispatch();
 
@@ -72,7 +66,7 @@ const IngresoMedicamento = () => {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
       const response = await consultaFetch(
         process.env.REACT_APP_API_URL +
-          "/api/med/" +
+          "/api/med/meds/" +
           formData.codigoItem +
           "/" +
           formData.codigoFarmacia,
@@ -137,40 +131,35 @@ const IngresoMedicamento = () => {
     }
   };
 
-  const getReporte = async () => {
-    try {
-      // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await axios.post(
-        process.env.REACT_APP_API_URL + "/api/med/meds",
-        { codigoItem: formData.codigoItem }
-      );
-      if (response.data.length > 0) {
-        const InformeStock = response.data;
-        setInformeStock(InformeStock);
-        setIsModalOpen(true); // Abre el modal
-        console.log(informeStock);
-      } else {
-        toast.error("Esta farmacia no tiene este medicamento en Stock.");
+  const getMedReport = () => {
+    if (formData.codigoItem === "") {
+      return toast.error("Ingrese un código de ítem válido.");
+    } else {
+      try {
+        dispatch(getMeds({ codigoItem: formData.codigoItem })).then((data) => {
+          //console.log("Medicamento encontrado", data.payload);
+          setInformeStock(data.payload);
+          setIsModalOpen(true); // Abre el modal
+          //console.log(informeStock);
+        });
+      } catch (error) {
+        console.log("error", error);
       }
-    } catch (error) {
-      console.log("error! ", error);
     }
   };
 
-  const getAllMeds = async () => {
-    const allMeds = await axios.post(
-      process.env.REACT_APP_API_URL + "/api/med/meds",
-      { codigoFarmacia: formData.codigoFarmacia }
-    );
-    console.log(formData.codigoFarmacia);
-    console.log(allMeds.data);
-    const medsArray = allMeds.data;
-    if (medsArray.length > 0) {
-      setInformeStock(medsArray);
-      setIsModalOpen(true); // Abre el modal
-      //console.log(informeStock);
-    } else {
-      toast.error("Esta farmacia no tiene este medicamento en Stock.");
+  const getPharmacyMeds = async () => {
+    try {
+      dispatch(getMeds({ codigoFarmacia: formData.codigoFarmacia })).then(
+        (data) => {
+          //console.log("Medicamento encontrado", data.payload);
+          setInformeStock(data.payload);
+          setIsModalOpen(true); // Abre el modal
+          //console.log(informeStock);
+        }
+      );
+    } catch (error) {
+      console.log("error", error);
     }
   };
 
@@ -183,29 +172,124 @@ const IngresoMedicamento = () => {
     if (e.key === "Enter") {
       e.preventDefault(); // Evita que el formulario se envíe si está en un form
       //console.log("Código escaneado:", barcode);
-
-      // Aquí haces la llamada Axios para obtener los datos
-      try {
-        const response = await consultaFetch(
-          process.env.REACT_APP_API_URL + "/api/med/" + formData.codigoItem,
-          JSON.parse(localStorage.getItem("user")).token
-        );
-        if (response.ok) {
-          const existingMed = await response.json();
-          console.log(existingMed);
+      const items = allMeds.filter((e) => e.codigoItem === formData.codigoItem);
+      console.log(items);
+      if (items.length > 0) {
+        const item = items.filter((e) => e.codigoFarmacia === "00060")[0];
+        console.log(item);
+        if (item) {
           setFormData({
             ...formData,
-            medicamento: existingMed.medicamento,
-            codigoItem: formData.codigoItem,
-            vencimiento: existingMed.vencimiento,
-            almacen: existingMed.almacen,
-            codigoFarmacia: existingMed.codigoFarmacia,
-            stock: existingMed.stock,
+            medicamento: item.medicamento,
+            codigoItem: item.codigoItem,
+            vencimiento: item.vencimiento,
+            almacen: item.almacen,
+            codigoFarmacia: item.codigoFarmacia,
+            stock: item.stock,
+          });
+        } else {
+          setFormData({
+            ...formData,
+            medicamento: items[0].medicamento,
+            codigoItem: items[0].codigoItem,
+            vencimiento: items[0].vencimiento,
+            almacen: items[0].almacen,
+            codigoFarmacia: items[0].codigoFarmacia,
+            stock: items[0].stock,
           });
         }
-      } catch (error) {
-        toast.error("Hubo un error al buscar este itemcode");
       }
+    }
+  };
+
+  const aceptar = (transfId, destino, codigoItem) => {
+    console.log("aceptar", destino, codigoItem);
+    try {
+      dispatch(
+        updateTransfer({
+          estado: "Recibido",
+          transfId,
+          codigoFarmacia: destino,
+        })
+      ).then((data) => {
+        console.log("Medicamento Aceptado ", data);
+        dispatch(getTransfer()).then((data) => {
+          setInformeTransito(data.payload);
+          console.log(data.payload);
+        });
+      });
+    } catch (error) {
+      console.log("error al actualizar el registro de transferencia", error);
+    }
+    const medId = allMeds.filter(
+      (e) => e.codigoItem === codigoItem && e.codigoFarmacia === destino
+    )[0];
+    console.log("medId", medId);
+
+    if (medId) {
+      const update = {
+        ...medId,
+        stock: medId.stock + 1,
+      };
+      dispatch(updateMed(update)).then(() => {
+        console.log("Medicamento actualizado:", update);
+        getPharmacyMeds();
+        dispatch(getTransfer());
+      });
+    } else {
+      const newOne = allMeds.filter((e) => e.codigoItem === codigoItem)[0];
+      console.log("newOne", newOne);
+      const newMed = {
+        medicamento: newOne.medicamento,
+        codigoItem: newOne.codigoItem,
+        almacen: newOne.almacen,
+
+        codigoFarmacia: destino,
+        stock: 1,
+        vencimiento: newOne.vencimiento,
+      };
+      dispatch(createMed(newMed)).then(() => {
+        console.log("Nuevo medicamento registrado:", newMed);
+        getPharmacyMeds();
+        dispatch(getTransfer());
+      });
+    }
+  };
+
+  const rechazado = (transfId, origen, codigoItem) => {
+    console.log("rechazado", origen, codigoItem);
+    try {
+      dispatch(
+        updateTransfer({
+          estado: "Cancelado",
+          transfId,
+        })
+      ).then((data) => {
+        console.log("Medicamento Rechazado ", data);
+        dispatch(getTransfer()).then((data) => {
+          setInformeTransito(data.payload);
+          console.log(data.payload);
+        });
+      });
+    } catch (error) {
+      console.log("error", error);
+    }
+
+    const medId = allMeds.filter(
+      (e) => e.codigoItem === codigoItem && e.codigoFarmacia === origen
+    )[0];
+    console.log("medId", medId);
+
+    if (medId) {
+      const update = {
+        ...medId,
+        stock: medId.stock + 1,
+      };
+      dispatch(updateMed(update)).then(() => {
+        console.log("Medicamento actualizado:", update);
+        getPharmacyMeds();
+        dispatch(getTransfer());
+      });
     }
   };
 
@@ -269,7 +353,7 @@ const IngresoMedicamento = () => {
               name="vencimiento"
               className="input"
               onChange={onChange}
-              value={formData.vencimiento.split("T")[0]}
+              value={formData?.vencimiento.split("T")[0]}
             />
           </div>
 
@@ -278,7 +362,7 @@ const IngresoMedicamento = () => {
             <label htmlFor="farmaciaSelect">Farmacia:</label>
             <select
               id="farmaciaSelect"
-              value={formData.codigoFarmacia}
+              value={formData.codigoFarmacia || "00060"}
               onChange={onChange}
               name="codigoFarmacia"
             >
@@ -333,14 +417,14 @@ const IngresoMedicamento = () => {
             <button
               type="button"
               className="btn btn-reverse"
-              onClick={getReporte}
+              onClick={getMedReport}
             >
               Información Consolidada
             </button>
             <button
               type="button"
               className="btn btn-reverse"
-              onClick={getAllMeds}
+              onClick={getPharmacyMeds}
             >
               Información Farmacia
             </button>
@@ -392,6 +476,79 @@ const IngresoMedicamento = () => {
                 ) : (
                   <tr>
                     <td colSpan="6">No hay datos disponibles.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <button onClick={closeModal} className="btn btn-close">
+              Cerrar
+            </button>
+
+            <h3>Medicamentos en Tránsito</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Medicamento</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {informeTransito.length > 0 ? (
+                  informeTransito.map((item, index) => {
+                    const origen = drugstore.find(
+                      (e) => e.codigo === item.codigoOrigen
+                    ); // Busca la ubicación correspondiente
+                    const destino = drugstore.find(
+                      (e) => e.codigo === item.codigoDestino
+                    );
+                    const medicamento = medsNombres.find(
+                      (e) => e.codigo === item.codigoItem
+                    );
+                    //console.log(item._id);
+                    return (
+                      <tr key={index}>
+                        {/* <td>{item.codigoFarmacia}</td> */}
+                        <td>{origen.nombre}</td>
+                        <td>{destino.nombre}</td>
+                        <td>{medicamento.nombre}</td>
+                        {/* <td>{item.stock}</td> */}
+                        <td className="action-buttons">
+                          <button
+                            className="btn"
+                            onClick={() =>
+                              aceptar(
+                                item._id,
+                                item.codigoDestino,
+                                item.codigoItem
+                              )
+                            }
+                          >
+                            Aceptar
+                          </button>
+                          <button
+                            className="btn btn-reverse"
+                            onClick={() =>
+                              rechazado(
+                                item._id,
+                                item.codigoOrigen,
+                                item.codigoItem
+                              )
+                            }
+                          >
+                            Rechazar
+                          </button>
+                        </td>
+                        {/* <td>
+                          {new Date(item.vencimiento).toLocaleDateString()}
+                        </td> */}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6">No hay medicamentos en tránsito.</td>
                   </tr>
                 )}
               </tbody>

@@ -45,7 +45,7 @@ const BarcodeScannerAll = ({ meds, setMeds }) => {
             try {
               // Realizamos la solicitud POST a la API
               const responseb = await axios.post(
-                process.env.REACT_APP_API_URL + "/api/med/meds",
+                process.env.REACT_APP_API_URL + "/api/med/",
                 { codigoItem: decodedText }
               );
 

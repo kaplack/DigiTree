@@ -1,23 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import medService from "./medService";
+import transfService from "./transfService";
 
 const initialState = {
-  allMeds: [],
-  meds: [],
-  med: {},
+  transfers: [],
   isError: false,
   isSuccess: false,
   isLoading: false,
   message: "",
 };
 
-//Create new job
-export const createMed = createAsyncThunk(
-  "med/create",
-  async (medData, thunkAPI) => {
+//Create new trasnf
+export const createTranfer = createAsyncThunk(
+  "transfer/create",
+  async (data, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await medService.createMed(medData, token);
+      return await transfService.createTransfer(data, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -64,12 +62,12 @@ export const createMed = createAsyncThunk(
 // })
 
 //Update med
-export const updateMed = createAsyncThunk(
-  "med/update",
+export const updateTransfer = createAsyncThunk(
+  "transfer/update",
   async (medData, thunkAPI) => {
     try {
       const token = thunkAPI.getState().auth.user.token;
-      return await medService.updateMed(medData, token);
+      return await transfService.updateTransfer(medData, token);
     } catch (error) {
       const message =
         (error.response &&
@@ -94,12 +92,12 @@ export const updateMed = createAsyncThunk(
 // })
 
 // //Get all meds
-export const getAllMeds = createAsyncThunk(
-  "meds/getAllMeds",
-  async (data, thunkAPI) => {
+export const getTransfer = createAsyncThunk(
+  "transfer/getTransfer",
+  async (_, thunkAPI) => {
     try {
       //const token = thunkAPI.getState().auth.user.token
-      return await medService.getAllMeds(data);
+      return await transfService.getTransfer();
     } catch (error) {
       const message =
         (error.response &&
@@ -112,42 +110,23 @@ export const getAllMeds = createAsyncThunk(
   }
 );
 
-// //Get all meds
-export const getMeds = createAsyncThunk(
-  "meds/getMeds",
-  async (data, thunkAPI) => {
-    try {
-      //const token = thunkAPI.getState().auth.user.token
-      return await medService.getMeds(data);
-    } catch (error) {
-      const message =
-        (error.response &&
-          error.response.data &&
-          error.response.data.message) ||
-        error.message ||
-        error.toString();
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
-
-export const medSlice = createSlice({
-  name: "med",
+export const transferSlice = createSlice({
+  name: "transfers",
   initialState,
   reducers: {
     reset: (state) => initialState,
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createMed.pending, (state) => {
+      .addCase(createTranfer.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(createMed.fulfilled, (state, action) => {
+      .addCase(createTranfer.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
-        state.meds = action.payload;
+        state.transfers = action.payload;
       })
-      .addCase(createMed.rejected, (state, action) => {
+      .addCase(createTranfer.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload;
@@ -171,14 +150,11 @@ export const medSlice = createSlice({
       // .addCase(getPublicWork.fulfilled, (state, action)=>{
       //     state.work = action.payload
       // })
-      .addCase(getAllMeds.fulfilled, (state, action) => {
-        state.allMeds = action.payload;
-      })
-      .addCase(getMeds.fulfilled, (state, action) => {
-        state.meds = action.payload;
+      .addCase(getTransfer.fulfilled, (state, action) => {
+        state.transfers = action.payload;
       });
   },
 });
 
-export const { reset } = medSlice.actions;
-export default medSlice.reducer;
+export const { reset } = transferSlice.actions;
+export default transferSlice.reducer;

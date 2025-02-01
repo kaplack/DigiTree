@@ -47,7 +47,7 @@ const BarcodeScanner = ({ formData, setFormData }) => {
             // });
             try {
               const response = await consultaFetch(
-                process.env.REACT_APP_API_URL + "/api/med/" + decodedText,
+                process.env.REACT_APP_API_URL + "/api/med/meds" + decodedText,
                 JSON.parse(localStorage.getItem("user")).token
               );
               if (response.ok) {

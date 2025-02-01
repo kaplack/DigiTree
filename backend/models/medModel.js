@@ -1,16 +1,5 @@
 const mongoose = require("mongoose");
 
-// const {
-//   medicamento,
-//   codigoItem,
-//   scan,
-//   almacen,
-//   codigoAlmacen,
-//   ubigeo1,
-//   codigoFarmacia,
-//   ubigeo2,
-// } = formData;
-
 const medSchema = mongoose.Schema(
   {
     medicamento: {

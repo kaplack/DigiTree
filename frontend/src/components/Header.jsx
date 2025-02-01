@@ -12,33 +12,51 @@ import {
   FaChartLine,
   FaBell,
 } from "react-icons/fa";
+import { FaTruckMedical } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { logout, reset } from "../features/auth/authSlice";
 import { getAllMeds } from "../features/med/medSlice";
+import { getTransfer } from "../features/transfer/transfSlice";
 
 function Header() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
   const { user } = useSelector((state) => state.auth);
-  const meds = useSelector((state) => state.med.allMeds);
+  const { transfers } = useSelector((state) => state.transfers);
+  const drugstore = useSelector((state) => state.drugstore);
+  const medsNombres = useSelector((state) => state.medicamento);
+  //const meds = useSelector((state) => state.med.allMeds);
+  const [transferCount, setTransferCount] = useState(0);
+  const [informeTransito, setInformeTransito] = useState([]);
 
-  // const enTramiteCount =
-  //   meds?.filter((med) => med.estado === "En Transito").length || 0;
+  useEffect(() => {
+    dispatch(getTransfer()).then((data) => {
+      setTransferCount(data.payload.length);
+    });
+    dispatch(getAllMeds());
+  }, [transfers.length]);
 
   const onLogout = () => {
     dispatch(logout());
     dispatch(reset());
     navigate("/");
   };
-  useEffect(() => {
-    dispatch(getAllMeds());
-  }, []);
 
   const handleMenuToggle = (index) => {
     setActiveMenu((prev) => (prev === index ? null : index));
+  };
+
+  const showTransfers = () => {
+    setInformeTransito(transfers);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false); // Cierra el modal
   };
 
   return (
@@ -53,10 +71,12 @@ function Header() {
       <ul className="auth-links">
         {user ? (
           <>
-            {/* <li className="user">
-              <FaBell />
-              <span className="user__name">{enTramiteCount}</span>
-            </li> */}
+            {transferCount > 0 && (
+              <li className="transfer" onClick={showTransfers}>
+                <FaTruckMedical size="1.6rem" />
+                <span className="transfer__count">{transferCount}</span>
+              </li>
+            )}
             <li className="user">
               <FaUser />
               <span className="user__name">{user.email.split("@")[0]}</span>
@@ -265,17 +285,17 @@ function Header() {
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     to="redistribucion/ingresomedicamentos"
                   >
-                    Ingreso de Medicamentos
+                    Reasignación de Medicamentos
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                     to="redistribucion/salidademedicamentos"
                   >
                     Salida de Medicamentos
                   </Link>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -346,6 +366,82 @@ function Header() {
           </li>
         </ul>
       </div>
+      {isModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Medicamentos en Tránsito</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Medicamento</th>
+                  {/* <th>Acción</th> */}
+                </tr>
+              </thead>
+              <tbody>
+                {informeTransito.length > 0 ? (
+                  informeTransito.map((item, index) => {
+                    const origen = drugstore.find(
+                      (e) => e.codigo === item.codigoOrigen
+                    ); // Busca la ubicación correspondiente
+                    const destino = drugstore.find(
+                      (e) => e.codigo === item.codigoDestino
+                    );
+                    const medicamento = medsNombres.find(
+                      (e) => e.codigo === item.codigoItem
+                    );
+                    //console.log(item._id);
+                    return (
+                      <tr key={index}>
+                        {/* <td>{item.codigoFarmacia}</td> */}
+                        <td>{origen.nombre}</td>
+                        <td>{destino.nombre}</td>
+                        <td>{medicamento.nombre}</td>
+                        {/* <td>{item.stock}</td> */}
+                        {/* <td>
+                          <button
+                            onClick={() =>
+                              aceptar(
+                                item._id,
+                                item.codigoDestino,
+                                item.codigoItem
+                              )
+                            }
+                          >
+                            Aceptar
+                          </button>
+                          <button
+                            onClick={() =>
+                              rechazado(
+                                item._id,
+                                item.codigoOrigen,
+                                item.codigoItem
+                              )
+                            }
+                          >
+                            Rechazar
+                          </button>
+                        </td> */}
+                        {/* <td>
+                          {new Date(item.vencimiento).toLocaleDateString()}
+                        </td> */}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6">No hay medicamentos en tránsito.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <button onClick={closeModal} className="btn btn-close">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

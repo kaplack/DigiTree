@@ -1,11 +1,11 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_URL + "/api/med/";
-const PUBLIC_API_URL = process.env.REACT_APP_API_URL + "/api/allworks/";
+const API_URL = process.env.REACT_APP_API_URL + "/api/med/transfer/";
+//const PUBLIC_API_URL = process.env.REACT_APP_API_URL + "/api/allworks/";
 
 // Create new work
 
-const createMed = async (medData, token) => {
+const createTransfer = async (medData, token) => {
   //console.log("workSlice: ", ticketData)
   const config = {
     headers: {
@@ -72,13 +72,13 @@ const createMed = async (medData, token) => {
 
 // Update med
 
-const updateMed = async (medData, token) => {
+const updateTransfer = async (medData, token) => {
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
-  console.log(API_URL + medData.codigoItem);
+  //console.log(API_URL + medData.codigoItem);
   const response = await axios.put(API_URL, medData, config);
 
   return response.data;
@@ -86,27 +86,20 @@ const updateMed = async (medData, token) => {
 
 // Get all works posts
 
-const getAllMeds = async (data) => {
-  const response = await axios.post(API_URL + "meds", data);
-
-  return response.data;
-};
-
-const getMeds = async (data) => {
-  const response = await axios.post(API_URL + "meds", data);
+const getTransfer = async () => {
+  const response = await axios.get(API_URL + "all");
 
   return response.data;
 };
 
 const medService = {
-  createMed,
-  updateMed,
+  createTransfer,
+  updateTransfer,
   // getWorks,
   // getWork,
   // updateWork,
   // deleteWork,
-  getAllMeds,
-  getMeds,
+  getTransfer,
   // getPublicWork
 };
 

@@ -6,7 +6,7 @@ function Redistribucion() {
   return (
     <>
       {/* <Slider /> */}
-      <Path titulo={"Redistribucion"} />
+      <Path titulo={"Redistribución"} />
       <div className="home-menu">
         <Link to="/redistribucion/ingresomedicamentos">
           <div className="home-menu__item">

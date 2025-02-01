@@ -2,15 +2,14 @@ import React, { useRef, useEffect, useState } from "react";
 import Path from "../../components/Path";
 import BarcodeScannerAll from "../../components/BarcoderScannerAll";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
+import { updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
-import { consultaFetch } from "../../app/utils";
+
 import axios from "axios";
 import {
   createTranfer,
   getTransfer,
 } from "../../features/transfer/transfSlice";
-import { set } from "mongoose";
 
 const ReIngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

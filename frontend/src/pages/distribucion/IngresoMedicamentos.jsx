@@ -64,18 +64,25 @@ const IngresoMedicamento = () => {
 
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await consultaFetch(
-        process.env.REACT_APP_API_URL +
-          "/api/med/meds/" +
-          formData.codigoItem +
-          "/" +
-          formData.codigoFarmacia,
-        JSON.parse(localStorage.getItem("user")).token
-      );
+      // const response = await consultaFetch(
+      //   process.env.REACT_APP_API_URL +
+      //     "/api/med/meds/" +
+      //     formData.codigoItem +
+      //     "/" +
+      //     formData.codigoFarmacia,
+      //   JSON.parse(localStorage.getItem("user")).token
+      // );
+      const response = [
+        allMeds.find(
+          (e) =>
+            e.codigoItem === formData.codigoItem &&
+            e.codigoFarmacia === formData.codigoFarmacia
+        ),
+      ];
       console.log(response);
 
-      if (response.ok) {
-        const existingMed = await response.json();
+      if (response.length > 0) {
+        const existingMed = response[0];
         console.log("existente", existingMed.stock + 1);
 
         const updateFormData = {
@@ -100,13 +107,14 @@ const IngresoMedicamento = () => {
           });
           console.log("Medicamento actualizado:", formData);
         });
-      } else if (response.status === 404) {
+      } else {
         const updateFormData = {
           ...formData,
           stock: 1,
         };
         //Si no existe, crea el nuevo medicamento
         dispatch(createMed(updateFormData)).then(() => {
+          console.log("Creando medicamento");
           setFormData({
             medicamento: "",
             codigoItem: "",
@@ -120,8 +128,6 @@ const IngresoMedicamento = () => {
           });
         });
         console.log("Nuevo medicamento registrado:", formData);
-      } else {
-        throw new Error("Error al verificar el medicamento");
       }
     } catch (error) {
       toast.error(

@@ -22,7 +22,7 @@ const PrivateRoute = ({ children }) => {
   const [authenticated, setAuthenticated] = useState(!!user); // Convertir a booleano
 
   const dispatch = useDispatch();
-  const token = JSON.parse(localStorage.getItem("user")).token;
+  const token = JSON.parse(localStorage.getItem("user"))?.token;
 
   // Vigilar cambios en el usuario autenticado
   useEffect(() => {

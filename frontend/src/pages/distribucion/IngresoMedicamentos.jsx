@@ -63,15 +63,6 @@ const IngresoMedicamento = () => {
     e.preventDefault();
 
     try {
-      // Realiza la consulta al backend para verificar si el medicamento ya existe
-      // const response = await consultaFetch(
-      //   process.env.REACT_APP_API_URL +
-      //     "/api/med/meds/" +
-      //     formData.codigoItem +
-      //     "/" +
-      //     formData.codigoFarmacia,
-      //   JSON.parse(localStorage.getItem("user")).token
-      // );
       const response = [
         allMeds.find(
           (e) =>

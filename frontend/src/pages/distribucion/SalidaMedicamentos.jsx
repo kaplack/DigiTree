@@ -44,6 +44,10 @@ const SalidaMedicamento = () => {
     if (barcodeInputRef.current) {
       barcodeInputRef.current.focus();
     }
+    setFormData((prevData) => ({
+      ...prevData,
+      codigoFarmacia: "00060",
+    }));
   }, []);
 
   const dispatch = useDispatch();
@@ -60,18 +64,15 @@ const SalidaMedicamento = () => {
 
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await consultaFetch(
-        process.env.REACT_APP_API_URL +
-          "/api/med/meds/" +
-          formData.codigoItem +
-          "/" +
-          formData.codigoFarmacia,
-        JSON.parse(localStorage.getItem("user")).token
+      const response = allMeds.filter(
+        (e) =>
+          e.codigoItem === formData.codigoItem &&
+          e.codigoFarmacia === formData.codigoFarmacia
       );
       console.log(response);
 
-      if (response.ok) {
-        const existingMed = await response.json();
+      if (response.length > 0) {
+        const existingMed = response;
         if (existingMed.stock > 0) {
           console.log("existente", existingMed.stock + 1);
 
@@ -107,30 +108,34 @@ const SalidaMedicamento = () => {
       }
     } catch (error) {
       toast.error(
-        "Hubo un error al actualizar el medicamento. Por favor, inténtelo nuevamente."
+        "Hubo un error al actualizar el medicamento. Por favor, inténtelo nuevamente." +
+          error
       );
       console.error("Error al actualizar el medicamento:", error);
     }
   };
 
-  const getReporte = async () => {
+  const getReporte = () => {
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
-      const response = await consultaFetch(
-        process.env.REACT_APP_API_URL +
-          "/api/med/meds/" +
-          formData.codigoItem +
-          "/" +
-          formData.codigoFarmacia,
-        JSON.parse(localStorage.getItem("user")).token
-      );
-      if (response.ok) {
-        const InformeStock = await response.json();
-        setInformeStock([InformeStock]);
-        setIsModalOpen(true); // Abre el modal
-        console.log(informeStock);
+      if (codigoItem !== "" && codigoFarmacia !== "") {
+        const response =
+          allMeds.filter(
+            (e) =>
+              e.codigoItem === codigoItem && e.codigoFarmacia === codigoFarmacia
+          ) || [];
+        console.log(response);
+        if (Array.isArray(response) && response.length > 0) {
+          console.log("Medicamento encontrado", response);
+          //const InformeStock = response[0];
+          setInformeStock(response);
+          setIsModalOpen(true); // Abre el modal
+          console.log(informeStock);
+        } else {
+          toast.error("No se encontró información de stock.");
+        }
       } else {
-        toast.error("No se encontró información de stock.");
+        toast.error("Ingrese un código de ítem válido.");
       }
     } catch (error) {
       console.log("error! ", error);
@@ -247,7 +252,7 @@ const SalidaMedicamento = () => {
                 </option>
               ))}
             </select>
-            {formData.codigoFarmacia && (
+            {formData?.codigoFarmacia && (
               <p>
                 Código de Farmacia:{" "}
                 {

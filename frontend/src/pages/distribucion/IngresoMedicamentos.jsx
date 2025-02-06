@@ -2,7 +2,12 @@ import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, updateMed, getMeds } from "../../features/med/medSlice";
+import {
+  createMed,
+  updateMed,
+  getMeds,
+  getAllMeds,
+} from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
 import {
@@ -85,6 +90,7 @@ const IngresoMedicamento = () => {
         console.log("formData Actualizado", updateFormData);
 
         dispatch(updateMed(updateFormData)).then(() => {
+          dispatch(getAllMeds());
           setFormData({
             medicamento: "",
             codigoItem: "",

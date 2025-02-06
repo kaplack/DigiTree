@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import Path from "../../components/Path";
 import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
-import { createMed, updateMed } from "../../features/med/medSlice";
+import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
 
@@ -72,7 +72,7 @@ const SalidaMedicamento = () => {
       console.log(response);
 
       if (response.length > 0) {
-        const existingMed = response;
+        const existingMed = response[0];
         if (existingMed.stock > 0) {
           console.log("existente", existingMed.stock + 1);
 
@@ -85,6 +85,7 @@ const SalidaMedicamento = () => {
           console.log("formData Actualizado", updateFormData);
 
           dispatch(updateMed(updateFormData)).then(() => {
+            dispatch(getAllMeds());
             setFormData({
               medicamento: "",
               codigoItem: "",

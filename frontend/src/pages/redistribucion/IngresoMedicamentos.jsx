@@ -23,7 +23,7 @@ const ReIngresoMedicamento = () => {
     ubigeoAlmacen: "",
     codigoFarmacia: "",
     ubigeoFarmacia: "",
-    stock: 0,
+    stock: "",
     vencimiento: "",
     codigoOrigen: "",
     lote: "",
@@ -237,6 +237,7 @@ const ReIngresoMedicamento = () => {
               placeholder="Ingrese la cantidad del medicamento"
               onChange={onChange}
               value={formData.stock}
+              min="1"
             />
           </div>
 

@@ -28,7 +28,7 @@ const IngresoMedicamento = () => {
     codigoItem: "",
     almacen: "",
     codigoFarmacia: "",
-    stock: 0,
+    stock: "",
     vencimiento: "",
     lote: "",
   });
@@ -66,6 +66,14 @@ const IngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (
+      formData.codigoItem === "" &&
+      formData.lote === "" &&
+      formData.stock === "" &&
+      formData.vencimiento === ""
+    ) {
+      return toast.error("Escanee el código de barras del medicamento");
+    }
     if (formData.stock && formData.stock > 0) {
       try {
         const response = allMeds.filter(
@@ -79,7 +87,7 @@ const IngresoMedicamento = () => {
           medicamento: "",
           codigoItem: "",
           almacen: "",
-          codigoFarmacia: "",
+          codigoFarmacia: "00060",
           stock: "",
           vencimiento: "",
           lote: "",
@@ -342,6 +350,7 @@ const IngresoMedicamento = () => {
               onChange={onChange}
               value={formData.codigoItem}
               onKeyDown={handleKeyDown}
+              required
             />
             {/* <FaSearch className="search-icon" /> */}
           </div>
@@ -382,6 +391,7 @@ const IngresoMedicamento = () => {
                 placeholder="Ingrese la cantidad del medicamento"
                 onChange={onChange}
                 value={formData.stock}
+                min="0"
               />
             </div>
           </div>

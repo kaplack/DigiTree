@@ -19,7 +19,7 @@ const SalidaMedicamento = () => {
     ubigeoAlmacen: "",
     codigoFarmacia: "",
     ubigeoFarmacia: "",
-    stock: 0,
+    stock: "",
     vencimiento: "",
     lote: "",
   });
@@ -66,7 +66,14 @@ const SalidaMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
+    if (
+      formData.codigoItem === "" &&
+      formData.lote === "" &&
+      formData.stock === "" &&
+      formData.vencimiento === ""
+    ) {
+      return toast.error("Escanee el código de barras del medicamento");
+    }
     try {
       // Realiza la consulta al backend para verificar si el medicamento ya existe
       const response = allMeds.filter(

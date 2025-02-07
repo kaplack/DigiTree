@@ -64,6 +64,18 @@ const ReIngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (
+      formData.codigoItem === "" ||
+      formData.lote === "" ||
+      formData.stock === "" ||
+      formData.codigoOrigen === "" ||
+      formData.codigoFarmacia === ""
+    ) {
+      return toast.error(
+        "Escanee el código de barras del medicamento o falta información para realizar la reasignación."
+      );
+    }
+
     if (formData.stock <= 0) {
       toast.error("Por favor ingrese una cantidad válida");
       return;

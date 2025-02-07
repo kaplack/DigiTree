@@ -67,9 +67,9 @@ const IngresoMedicamento = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (
-      formData.codigoItem === "" &&
-      formData.lote === "" &&
-      formData.stock === "" &&
+      formData.codigoItem === "" ||
+      formData.lote === "" ||
+      formData.stock === "" ||
       formData.vencimiento === ""
     ) {
       return toast.error("Escanee el código de barras del medicamento");

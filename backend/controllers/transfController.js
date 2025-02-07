@@ -5,7 +5,8 @@ const User = require("../models/userModel");
 const Transferencia = require("../models/transferModel");
 
 const createTransfer = asyncHandler(async (req, res) => {
-  const { codigoItem, estado, codigoOrigen, codigoDestino } = req.body;
+  const { codigoItem, estado, codigoOrigen, codigoDestino, lote, stock } =
+    req.body;
   console.log(req.body);
 
   if (!codigoItem) {
@@ -28,6 +29,8 @@ const createTransfer = asyncHandler(async (req, res) => {
     estado,
     codigoOrigen,
     codigoDestino,
+    lote,
+    stock,
     user: req.user.id,
   });
 

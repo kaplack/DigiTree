@@ -18,14 +18,11 @@ const medSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    estado: {
-      type: String,
-    },
-    codigoOrigen: {
-      type: String,
-    },
     stock: {
       type: Number,
+    },
+    lote: {
+      type: String,
     },
     vencimiento: {
       type: Date,

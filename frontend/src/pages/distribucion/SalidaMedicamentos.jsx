@@ -5,11 +5,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { createMed, getAllMeds, updateMed } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
 import { consultaFetch } from "../../app/utils";
+import { getTransfer } from "../../features/transfer/transfSlice";
 
 const SalidaMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [informeStock, setInformeStock] = useState([]);
-
+  const [informeTransito, setInformeTransito] = useState([]);
   const [formData, setFormData] = useState({
     medicamento: "",
     codigoItem: "",
@@ -20,22 +21,22 @@ const SalidaMedicamento = () => {
     ubigeoFarmacia: "",
     stock: 0,
     vencimiento: "",
+    lote: "",
   });
 
   const drugstore = useSelector((state) => state.drugstore);
   const warehouse = useSelector((state) => state.warehouse);
   const { allMeds } = useSelector((state) => state.med);
+  const medsNombres = useSelector((state) => state.medicamento);
 
   const {
     medicamento,
     codigoItem,
     almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
     codigoFarmacia,
-    ubigeoFarmacia,
     stock,
     vencimiento,
+    lote,
   } = formData;
 
   const barcodeInputRef = useRef(null);
@@ -48,6 +49,10 @@ const SalidaMedicamento = () => {
       ...prevData,
       codigoFarmacia: "00060",
     }));
+    dispatch(getTransfer()).then((data) => {
+      setInformeTransito(data.payload);
+      //console.log(data.payload);
+    });
   }, []);
 
   const dispatch = useDispatch();
@@ -67,18 +72,19 @@ const SalidaMedicamento = () => {
       const response = allMeds.filter(
         (e) =>
           e.codigoItem === formData.codigoItem &&
-          e.codigoFarmacia === formData.codigoFarmacia
+          e.codigoFarmacia === formData.codigoFarmacia &&
+          e.lote === formData.lote
       );
       console.log(response);
 
       if (response.length > 0) {
         const existingMed = response[0];
         if (existingMed.stock > 0) {
-          console.log("existente", existingMed.stock + 1);
+          //console.log("existente", existingMed.stock + 1);
 
           const updateFormData = {
             ...formData,
-            stock: existingMed.stock - 1,
+            stock: existingMed.stock * 1 - formData.stock * 1,
           };
           setFormData(updateFormData);
 
@@ -90,10 +96,9 @@ const SalidaMedicamento = () => {
               medicamento: "",
               codigoItem: "",
               almacen: "",
-              codigoAlmacen: "",
-              ubigeoAlmacen: "",
+
               codigoFarmacia: "",
-              ubigeoFarmacia: "",
+              lote: "",
               stock: "",
               vencimiento: "",
             });
@@ -165,7 +170,8 @@ const SalidaMedicamento = () => {
             vencimiento: item.vencimiento,
             almacen: item.almacen,
             codigoFarmacia: item.codigoFarmacia,
-            stock: item.stock,
+            //stock: item.stock,
+            lote: item.lote,
           });
         } else {
           setFormData({
@@ -175,7 +181,8 @@ const SalidaMedicamento = () => {
             vencimiento: items[0].vencimiento,
             almacen: items[0].almacen,
             codigoFarmacia: items[0].codigoFarmacia,
-            stock: items[0].stock,
+            //stock: items[0].stock,
+            lote: items[0].lote,
           });
         }
       }
@@ -220,6 +227,34 @@ const SalidaMedicamento = () => {
           </div>
 
           <BarcodeScanner setFormData={setFormData} formData={formData} />
+
+          {/* lote y cantidad */}
+          <div className="form-row">
+            <div className="form-group" id="scan-section">
+              <label htmlFor="lote">Lote</label>
+              <input
+                type="text"
+                id="lote"
+                name="lote"
+                className="input"
+                placeholder="Ingrese el lote del medicamento"
+                onChange={onChange}
+                value={formData.lote}
+              />
+            </div>
+            <div className="form-group" id="scan-section">
+              <label htmlFor="stock">Cantidad</label>
+              <input
+                type="number"
+                id="stock"
+                name="stock"
+                className="input"
+                placeholder="Ingrese la cantidad del medicamento"
+                onChange={onChange}
+                value={formData.stock}
+              />
+            </div>
+          </div>
 
           {/* Vencimiento */}
 
@@ -314,7 +349,7 @@ const SalidaMedicamento = () => {
               <thead>
                 <tr>
                   <th>Código Ubicación</th>
-                  <th>Ubicación</th>
+                  <th>lote</th>
                   <th>CódigoItem</th>
                   <th>Medicamento</th>
                   <th>Stock</th>
@@ -324,22 +359,25 @@ const SalidaMedicamento = () => {
               <tbody>
                 {informeStock.length > 0 ? (
                   informeStock.map((item, index) => {
+                    const fecha = item.vencimiento.split("T")[0].split("-");
                     const ubicacion = drugstore.find(
                       (e) => e.codigo === item.codigoFarmacia
                     ); // Busca la ubicación correspondiente
                     return (
                       <tr key={index}>
-                        <td>{item.codigoFarmacia}</td>
                         <td>
+                          {item.codigoFarmacia + " "}
                           {ubicacion
                             ? ubicacion.nombre
                             : "Ubicación no encontrada"}
                         </td>
+                        <td>{item.lote}</td>
+
                         <td>{item.codigoItem}</td>
                         <td>{item.medicamento}</td>
                         <td>{item.stock}</td>
                         <td>
-                          {new Date(item.vencimiento).toLocaleDateString()}
+                          {fecha[2]}-{fecha[1]}-{fecha[0]}
                         </td>
                       </tr>
                     );
@@ -347,6 +385,55 @@ const SalidaMedicamento = () => {
                 ) : (
                   <tr>
                     <td colSpan="6">No hay datos disponibles.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <button onClick={closeModal} className="btn btn-close">
+              Cerrar
+            </button>
+            <h3>Medicamentos en Tránsito</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Medicamento</th>
+                </tr>
+              </thead>
+              <tbody>
+                {informeTransito.length > 0 ? (
+                  informeTransito.map((item, index) => {
+                    const origen = drugstore.find(
+                      (e) =>
+                        e.codigo ===
+                        allMeds.find((e) => e._id === item.codigoOrigen)
+                          .codigoFarmacia
+                    ); // Busca la ubicación correspondiente
+                    const destino = drugstore.find(
+                      (e) => e.codigo === item.codigoDestino
+                    );
+                    const medicamento = medsNombres.find(
+                      (e) => e.codigo === item.codigoItem
+                    );
+                    //console.log(item._id);
+                    return (
+                      <tr key={index}>
+                        {/* <td>{item.codigoFarmacia}</td> */}
+                        <td>{origen.nombre}</td>
+                        <td>{destino.nombre}</td>
+                        <td>{medicamento.nombre}</td>
+                        {/* <td>{item.stock}</td> */}
+
+                        {/* <td>
+                          {new Date(item.vencimiento).toLocaleDateString()}
+                        </td> */}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6">No hay medicamentos en tránsito.</td>
                   </tr>
                 )}
               </tbody>

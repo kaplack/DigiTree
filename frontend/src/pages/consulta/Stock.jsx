@@ -4,11 +4,12 @@ import BarcodeScanner from "../../components/BarcoderScanner";
 import { useDispatch, useSelector } from "react-redux";
 import { getMeds } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
+import { getTransfer } from "../../features/transfer/transfSlice";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [informeStock, setInformeStock] = useState([]);
-
+  const [informeTransito, setInformeTransito] = useState([]);
   const [formData, setFormData] = useState({
     medicamento: "",
     codigoItem: "",
@@ -18,6 +19,7 @@ const IngresoMedicamento = () => {
   const drugstore = useSelector((state) => state.drugstore);
   //const warehouse = useSelector((state) => state.warehouse);
   const { allMeds } = useSelector((state) => state.med);
+  const medsNombres = useSelector((state) => state.medicamento);
 
   const { medicamento, codigoItem, codigoFarmacia } = formData;
 
@@ -105,6 +107,10 @@ const IngresoMedicamento = () => {
             stock: items[0].stock,
           });
         }
+        dispatch(getTransfer()).then((data) => {
+          setInformeTransito(data.payload);
+          //console.log(data.payload);
+        });
       }
     }
   };
@@ -234,6 +240,55 @@ const IngresoMedicamento = () => {
                 ) : (
                   <tr>
                     <td colSpan="6">No hay datos disponibles.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+            <button onClick={closeModal} className="btn btn-close">
+              Cerrar
+            </button>
+            <h3>Medicamentos en Tránsito</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Origen</th>
+                  <th>Destino</th>
+                  <th>Medicamento</th>
+                </tr>
+              </thead>
+              <tbody>
+                {informeTransito.length > 0 ? (
+                  informeTransito.map((item, index) => {
+                    const origen = drugstore.find(
+                      (e) =>
+                        e.codigo ===
+                        allMeds.find((e) => e._id === item.codigoOrigen)
+                          .codigoFarmacia
+                    ); // Busca la ubicación correspondiente
+                    const destino = drugstore.find(
+                      (e) => e.codigo === item.codigoDestino
+                    );
+                    const medicamento = medsNombres.find(
+                      (e) => e.codigo === item.codigoItem
+                    );
+                    //console.log(item._id);
+                    return (
+                      <tr key={index}>
+                        {/* <td>{item.codigoFarmacia}</td> */}
+                        <td>{origen.nombre}</td>
+                        <td>{destino.nombre}</td>
+                        <td>{medicamento.nombre}</td>
+                        {/* <td>{item.stock}</td> */}
+
+                        {/* <td>
+                          {new Date(item.vencimiento).toLocaleDateString()}
+                        </td> */}
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6">No hay medicamentos en tránsito.</td>
                   </tr>
                 )}
               </tbody>

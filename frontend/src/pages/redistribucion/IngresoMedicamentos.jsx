@@ -26,6 +26,7 @@ const ReIngresoMedicamento = () => {
     stock: 0,
     vencimiento: "",
     codigoOrigen: "",
+    lote: "",
   });
 
   const [meds, setMeds] = useState([]);
@@ -63,51 +64,57 @@ const ReIngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    const origen = meds.find(
-      (item) => item.codigoFarmacia === formData.codigoOrigen
-    );
-    //console.log(origen);
+    const origen = meds.find((item) => item._id === formData.codigoOrigen);
+    console.log(origen);
 
-    const updateOrigen = {
-      ...origen,
-      stock: origen.stock - 1,
-    };
+    if (origen.stock >= formData.stock) {
+      const updateOrigen = {
+        ...origen,
+        stock: origen.stock * 1 - formData.stock * 1,
+      };
 
-    // funcion updateMed para Actualizar aumenta en uno el stock de la farmacia origen
-    try {
-      dispatch(updateMed(updateOrigen));
-      console.log("Origen Actualizado:", updateOrigen);
-    } catch (error) {
-      console.log(error);
-    }
+      // funcion updateMed para Actualizar aumenta en uno el stock de la farmacia origen
+      try {
+        dispatch(updateMed(updateOrigen));
+        console.log("Origen Actualizado:", updateOrigen);
+      } catch (error) {
+        console.log(error);
+      }
 
-    const transfer = {
-      codigoItem: formData.codigoItem,
-      codigoDestino: formData.codigoFarmacia,
-      codigoOrigen: formData.codigoOrigen,
-      estado: "En Tránsito",
-    };
+      const transfer = {
+        codigoItem: formData.codigoItem,
+        codigoDestino: formData.codigoFarmacia,
+        codigoOrigen: formData.codigoOrigen,
+        stock: formData.stock,
+        lote: origen.lote,
+        estado: "En Tránsito",
+      };
 
-    try {
-      dispatch(createTranfer(transfer)).then(() => {
-        console.log("transfer creado");
-        setFormData({
-          medicamento: "",
-          codigoItem: "",
-          almacen: "",
-          codigoAlmacen: "",
-          ubigeoAlmacen: "",
-          codigoFarmacia: "",
-          ubigeoFarmacia: "",
-          stock: 0,
-          vencimiento: "",
-          codigoOrigen: "",
-        }); // Limpia el formulario
-        setMeds([]); // Limpia los medicamentos
-        dispatch(getTransfer());
-      });
-    } catch (error) {
-      console.log(error);
+      try {
+        dispatch(createTranfer(transfer)).then(() => {
+          console.log("transfer creado");
+          setFormData({
+            medicamento: "",
+            codigoItem: "",
+            almacen: "",
+            codigoAlmacen: "",
+            ubigeoAlmacen: "",
+            codigoFarmacia: "",
+            ubigeoFarmacia: "",
+            stock: 0,
+            vencimiento: "",
+            codigoOrigen: "",
+          }); // Limpia el formulario
+          setMeds([]); // Limpia los medicamentos
+          dispatch(getTransfer());
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      toast.error(
+        "La cantidad a transferir supera el stock de la farmacia origen."
+      );
     }
   };
 
@@ -153,11 +160,12 @@ const ReIngresoMedicamento = () => {
         const existingMed = responseb.data;
 
         // Mostramos los datos en la consola
-        //console.log(existingMed);
+        console.log(existingMed);
         setMeds(existingMed);
         setFormData({
           ...formData,
           medicamento: existingMed[0]?.medicamento || "",
+          lote: existingMed[0]?.lote || "",
         });
 
         // Si necesitas realizar algo adicional con los datos:
@@ -217,6 +225,21 @@ const ReIngresoMedicamento = () => {
 
           <BarcodeScannerAll setMeds={setMeds} meds={meds} />
 
+          {/* lote y cantidad */}
+
+          <div className="form-group" id="scan-section">
+            <label htmlFor="stock">Cantidad</label>
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              className="input"
+              placeholder="Ingrese la cantidad del medicamento"
+              onChange={onChange}
+              value={formData.stock}
+            />
+          </div>
+
           {/* Farmacia Origen */}
           <div className="form-group">
             <label htmlFor="farmaciaSelectO">Farmacia Origen:</label>
@@ -233,20 +256,23 @@ const ReIngresoMedicamento = () => {
                 .filter((farmacia) =>
                   meds.some((med) => med.codigoFarmacia === farmacia.codigo)
                 )
-                .map((filteredFarmacia) => {
-                  // Buscar el medicamento relacionado para obtener el stock
-                  const medRelacionado = meds.find(
+                .flatMap((filteredFarmacia) => {
+                  // Filtrar todos los medicamentos relacionados con la farmacia
+                  const medsRelacionados = meds.filter(
                     (med) => med.codigoFarmacia === filteredFarmacia.codigo
                   );
-                  return (
+
+                  // Retornar una opción por cada medicamento relacionado
+                  return medsRelacionados.map((med) => (
+                    //console.log("farmaciaFiltrada", med),
                     <option
-                      key={filteredFarmacia.codigo}
-                      value={filteredFarmacia.codigo}
+                      key={`${filteredFarmacia.codigo}-${med.lote}`}
+                      value={med._id}
                     >
-                      {filteredFarmacia.nombre} - Stock:{" "}
-                      {medRelacionado?.stock || 0}
+                      {filteredFarmacia.nombre} - Lote: {med.lote} - Stock:{" "}
+                      {med.stock}
                     </option>
-                  );
+                  ));
                 })}
             </select>
             {formData.codigoOrigen && (
@@ -312,8 +338,8 @@ const ReIngresoMedicamento = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Código Ubicación</th>
                   <th>Ubicación</th>
+                  <th>Lote</th>
                   <th>CódigoItem</th>
                   <th>Medicamento</th>
                   <th>Stock</th>
@@ -328,12 +354,13 @@ const ReIngresoMedicamento = () => {
                     ); // Busca la ubicación correspondiente
                     return (
                       <tr key={index}>
-                        <td>{item.codigoFarmacia}</td>
                         <td>
+                          {item.codigoFarmacia + " "}
                           {ubicacion
                             ? ubicacion.nombre
                             : "Ubicación no encontrada"}
                         </td>
+                        <td>{item.lote}</td>
                         <td>{item.codigoItem}</td>
                         <td>{item.medicamento}</td>
                         <td>{item.stock}</td>

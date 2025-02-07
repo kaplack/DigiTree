@@ -9,11 +9,13 @@ import {
   getAllMeds,
 } from "../../features/med/medSlice";
 import { toast } from "react-toastify";
-import { consultaFetch } from "../../app/utils";
+
 import {
   getTransfer,
   updateTransfer,
 } from "../../features/transfer/transfSlice";
+
+//import Report from "../../components/Report";
 
 const IngresoMedicamento = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,12 +27,10 @@ const IngresoMedicamento = () => {
     medicamento: "",
     codigoItem: "",
     almacen: "",
-    codigoAlmacen: "",
-    ubigeoAlmacen: "",
     codigoFarmacia: "",
-    ubigeoFarmacia: "",
     stock: 0,
     vencimiento: "",
+    lote: "",
   });
 
   const drugstore = useSelector((state) => state.drugstore);
@@ -51,7 +51,7 @@ const IngresoMedicamento = () => {
 
     dispatch(getTransfer()).then((data) => {
       setInformeTransito(data.payload);
-      console.log(data.payload);
+      //console.log(data.payload);
     });
   }, []);
 
@@ -68,63 +68,51 @@ const IngresoMedicamento = () => {
     e.preventDefault();
 
     try {
-      const response = [
-        allMeds.find(
-          (e) =>
-            e.codigoItem === formData.codigoItem &&
-            e.codigoFarmacia === formData.codigoFarmacia
-        ),
-      ];
+      const response = allMeds.filter(
+        (e) =>
+          e.codigoItem === formData.codigoItem &&
+          e.codigoFarmacia === formData.codigoFarmacia &&
+          e.lote === formData.lote
+      );
       console.log(response);
+      const formDataClear = {
+        medicamento: "",
+        codigoItem: "",
+        almacen: "",
+        codigoFarmacia: "",
+        stock: "",
+        vencimiento: "",
+        lote: "",
+      };
 
       if (response.length > 0) {
         const existingMed = response[0];
-        console.log("existente", existingMed.stock + 1);
+        //console.log("existente", existingMed.stock + 1);
 
         const updateFormData = {
           ...formData,
-          stock: existingMed.stock + 1,
+          stock: existingMed.stock * 1 + formData.stock * 1,
         };
         setFormData(updateFormData);
 
-        console.log("formData Actualizado", updateFormData);
+        //console.log("formData Actualizado", updateFormData);
 
         dispatch(updateMed(updateFormData)).then(() => {
           dispatch(getAllMeds());
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
-          });
-          console.log("Medicamento actualizado:", formData);
+          setFormData(formDataClear);
+          console.log("Medicamento actualizado:", updateFormData);
         });
       } else {
+        //NO EXISTE, ENTONCES LO CREAMOS
         const updateFormData = {
           ...formData,
-          stock: 1,
+          stock: formData.stock,
         };
-        //Si no existe, crea el nuevo medicamento
+
         dispatch(createMed(updateFormData)).then(() => {
-          console.log("Creando medicamento");
-          setFormData({
-            medicamento: "",
-            codigoItem: "",
-            almacen: "",
-            codigoAlmacen: "",
-            ubigeoAlmacen: "",
-            codigoFarmacia: "",
-            ubigeoFarmacia: "",
-            stock: "",
-            vencimiento: "",
-          });
+          setFormData(formDataClear);
+          console.log("medicamento creado: ", updateFormData);
         });
-        console.log("Nuevo medicamento registrado:", formData);
       }
     } catch (error) {
       toast.error(
@@ -155,7 +143,7 @@ const IngresoMedicamento = () => {
     try {
       dispatch(getMeds({ codigoFarmacia: formData.codigoFarmacia })).then(
         (data) => {
-          //console.log("Medicamento encontrado", data.payload);
+          console.log("Medicamento encontrado", data.payload);
           setInformeStock(data.payload);
           setIsModalOpen(true); // Abre el modal
           //console.log(informeStock);
@@ -188,7 +176,8 @@ const IngresoMedicamento = () => {
             vencimiento: item.vencimiento,
             almacen: item.almacen,
             codigoFarmacia: item.codigoFarmacia,
-            stock: item.stock,
+            //stock: item.stock,
+            lote: item.lote,
           });
         } else {
           setFormData({
@@ -198,15 +187,17 @@ const IngresoMedicamento = () => {
             vencimiento: items[0].vencimiento,
             almacen: items[0].almacen,
             codigoFarmacia: items[0].codigoFarmacia,
-            stock: items[0].stock,
+            //stock: items[0].stock,
+            lote: item[0].lote,
           });
         }
       }
     }
   };
 
-  const aceptar = (transfId, destino, codigoItem) => {
+  const aceptar = (transfId, destino, codigoItem, lote, stock) => {
     console.log("aceptar", destino, codigoItem);
+
     try {
       dispatch(
         updateTransfer({
@@ -225,14 +216,17 @@ const IngresoMedicamento = () => {
       console.log("error al actualizar el registro de transferencia", error);
     }
     const medId = allMeds.filter(
-      (e) => e.codigoItem === codigoItem && e.codigoFarmacia === destino
+      (e) =>
+        e.codigoItem === codigoItem &&
+        e.codigoFarmacia === destino &&
+        e.lote === lote
     )[0];
     console.log("medId", medId);
 
     if (medId) {
       const update = {
         ...medId,
-        stock: medId.stock + 1,
+        stock: medId.stock * 1 + stock * 1,
       };
       dispatch(updateMed(update)).then(() => {
         console.log("Medicamento actualizado:", update);
@@ -246,9 +240,9 @@ const IngresoMedicamento = () => {
         medicamento: newOne.medicamento,
         codigoItem: newOne.codigoItem,
         almacen: newOne.almacen,
-
+        lote,
         codigoFarmacia: destino,
-        stock: 1,
+        stock,
         vencimiento: newOne.vencimiento,
       };
       dispatch(createMed(newMed)).then(() => {
@@ -345,6 +339,34 @@ const IngresoMedicamento = () => {
               Cargar Medicamento en Transito
             </button>
           ) : null} */}
+
+          {/* lote y cantidad */}
+          <div className="form-row">
+            <div className="form-group" id="scan-section">
+              <label htmlFor="lote">Lote</label>
+              <input
+                type="text"
+                id="lote"
+                name="lote"
+                className="input"
+                placeholder="Ingrese el lote del medicamento"
+                onChange={onChange}
+                value={formData.lote}
+              />
+            </div>
+            <div className="form-group" id="scan-section">
+              <label htmlFor="stock">Cantidad</label>
+              <input
+                type="number"
+                id="stock"
+                name="stock"
+                className="input"
+                placeholder="Ingrese la cantidad del medicamento"
+                onChange={onChange}
+                value={formData.stock}
+              />
+            </div>
+          </div>
 
           {/* Vencimiento */}
 
@@ -445,8 +467,8 @@ const IngresoMedicamento = () => {
             <table>
               <thead>
                 <tr>
-                  <th>Código Ubicación</th>
                   <th>Ubicación</th>
+                  <th>Lote</th>
                   <th>CódigoItem</th>
                   <th>Medicamento</th>
                   <th>Stock</th>
@@ -456,22 +478,24 @@ const IngresoMedicamento = () => {
               <tbody>
                 {informeStock.length > 0 ? (
                   informeStock.map((item, index) => {
+                    const fecha = item.vencimiento.split("T")[0].split("-");
                     const ubicacion = drugstore.find(
                       (e) => e.codigo === item.codigoFarmacia
                     ); // Busca la ubicación correspondiente
                     return (
                       <tr key={index}>
-                        <td>{item.codigoFarmacia}</td>
                         <td>
+                          {item.codigoFarmacia + " "}
                           {ubicacion
                             ? ubicacion.nombre
                             : "Ubicación no encontrada"}
                         </td>
+                        <td>{item.lote}</td>
                         <td>{item.codigoItem}</td>
                         <td>{item.medicamento}</td>
                         <td>{item.stock}</td>
                         <td>
-                          {new Date(item.vencimiento).toLocaleDateString()}
+                          {fecha[2]}-{fecha[1]}-{fecha[0]}
                         </td>
                       </tr>
                     );
@@ -501,7 +525,10 @@ const IngresoMedicamento = () => {
                 {informeTransito.length > 0 ? (
                   informeTransito.map((item, index) => {
                     const origen = drugstore.find(
-                      (e) => e.codigo === item.codigoOrigen
+                      (e) =>
+                        e.codigo ===
+                        allMeds.find((e) => e._id === item.codigoOrigen)
+                          .codigoFarmacia
                     ); // Busca la ubicación correspondiente
                     const destino = drugstore.find(
                       (e) => e.codigo === item.codigoDestino
@@ -524,7 +551,9 @@ const IngresoMedicamento = () => {
                               aceptar(
                                 item._id,
                                 item.codigoDestino,
-                                item.codigoItem
+                                item.codigoItem,
+                                item.lote,
+                                item.stock
                               )
                             }
                           >

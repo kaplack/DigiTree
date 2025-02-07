@@ -27,6 +27,7 @@ function Header() {
   const [activeMenu, setActiveMenu] = useState(null);
   const { user } = useSelector((state) => state.auth);
   const { transfers } = useSelector((state) => state.transfers);
+  const { allMeds } = useSelector((state) => state.med);
   const drugstore = useSelector((state) => state.drugstore);
   const medsNombres = useSelector((state) => state.medicamento);
   //const meds = useSelector((state) => state.med.allMeds);
@@ -382,9 +383,14 @@ function Header() {
               <tbody>
                 {informeTransito.length > 0 ? (
                   informeTransito.map((item, index) => {
+                    console.log("item", item);
                     const origen = drugstore.find(
-                      (e) => e.codigo === item.codigoOrigen
+                      (e) =>
+                        e.codigo ===
+                        allMeds.find((e) => e._id === item.codigoOrigen)
+                          ?.codigoFarmacia
                     ); // Busca la ubicación correspondiente
+                    console.log(origen);
                     const destino = drugstore.find(
                       (e) => e.codigo === item.codigoDestino
                     );
@@ -395,7 +401,7 @@ function Header() {
                     return (
                       <tr key={index}>
                         {/* <td>{item.codigoFarmacia}</td> */}
-                        <td>{origen.nombre}</td>
+                        <td>{origen?.nombre}</td>
                         <td>{destino.nombre}</td>
                         <td>{medicamento.nombre}</td>
                         {/* <td>{item.stock}</td> */}

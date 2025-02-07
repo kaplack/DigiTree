@@ -55,14 +55,10 @@ const createMed = asyncHandler(async (req, res) => {
     medicamento,
     codigoItem,
     almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
     codigoFarmacia,
-    ubigeoFarmacia,
     stock,
     vencimiento,
-    estado,
-    codigoOrigen,
+    lote,
   } = req.body;
   console.log(req.body);
 
@@ -84,15 +80,11 @@ const createMed = asyncHandler(async (req, res) => {
     medicamento,
     codigoItem,
     almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
     codigoFarmacia,
-    ubigeoFarmacia,
     stock,
     user: req.user.id,
     vencimiento,
-    estado,
-    codigoOrigen,
+    lote,
   });
 
   res.status(201).json(med);
@@ -147,31 +139,18 @@ const updateMed = asyncHandler(async (req, res) => {
     medicamento,
     codigoItem,
     almacen,
-    codigoAlmacen,
-    ubigeoAlmacen,
     codigoFarmacia,
-    ubigeoFarmacia,
     stock,
     vencimiento,
-    estado,
-    codigoOrigen,
+    lote,
   } = req.body;
 
   console.log(stock);
 
   const updatedWork = await Med.findOneAndUpdate(
-    { codigoItem, codigoFarmacia },
+    { codigoItem, codigoFarmacia, lote },
     {
-      medicamento,
-      almacen,
-      codigoAlmacen,
-      ubigeoAlmacen,
-      codigoFarmacia,
-      ubigeoFarmacia,
-      vencimiento,
       stock,
-      estado,
-      codigoOrigen,
     },
     { new: true }
   );

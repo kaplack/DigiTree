@@ -14,6 +14,14 @@ const transferenciaSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    lote: {
+      type: String,
+      required: true,
+    },
+    stock: {
+      type: Number,
+      required: true,
+    },
     estado: {
       type: String,
       enum: ["En Tránsito", "Recibido", "Cancelado"],

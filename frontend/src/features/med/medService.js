@@ -78,7 +78,7 @@ const updateMed = async (medData, token) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  console.log(API_URL + medData.codigoItem);
+  //console.log(API_URL + medData.codigoItem);
   const response = await axios.put(API_URL, medData, config);
 
   return response.data;

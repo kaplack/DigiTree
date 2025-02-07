@@ -7,14 +7,14 @@ const Transferencia = require("../models/transferModel");
 const createTransfer = asyncHandler(async (req, res) => {
   const { codigoItem, estado, codigoOrigen, codigoDestino, lote, stock } =
     req.body;
-  console.log(req.body);
+  //console.log(req.body);
 
   if (!codigoItem) {
     res.status(400);
     throw new Error("Please add a title and description");
   }
 
-  console.log(req.user);
+  //console.log(req.user);
   //console.log(req);
   // Get works using id in the JWT
   const user = await User.findById(req.user.id);
@@ -35,7 +35,7 @@ const createTransfer = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(transf);
-  console.log(transf);
+  //console.log(transf);
 });
 
 // @desc    Update user works

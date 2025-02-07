@@ -66,59 +66,62 @@ const IngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      const response = allMeds.filter(
-        (e) =>
-          e.codigoItem === formData.codigoItem &&
-          e.codigoFarmacia === formData.codigoFarmacia &&
-          e.lote === formData.lote
-      );
-      console.log(response);
-      const formDataClear = {
-        medicamento: "",
-        codigoItem: "",
-        almacen: "",
-        codigoFarmacia: "",
-        stock: "",
-        vencimiento: "",
-        lote: "",
-      };
-
-      if (response.length > 0) {
-        const existingMed = response[0];
-        //console.log("existente", existingMed.stock + 1);
-
-        const updateFormData = {
-          ...formData,
-          stock: existingMed.stock * 1 + formData.stock * 1,
-        };
-        setFormData(updateFormData);
-
-        //console.log("formData Actualizado", updateFormData);
-
-        dispatch(updateMed(updateFormData)).then(() => {
-          dispatch(getAllMeds());
-          setFormData(formDataClear);
-          console.log("Medicamento actualizado:", updateFormData);
-        });
-      } else {
-        //NO EXISTE, ENTONCES LO CREAMOS
-        const updateFormData = {
-          ...formData,
-          stock: formData.stock,
+    if (formData.stock && formData.stock > 0) {
+      try {
+        const response = allMeds.filter(
+          (e) =>
+            e.codigoItem === formData.codigoItem &&
+            e.codigoFarmacia === formData.codigoFarmacia &&
+            e.lote === formData.lote
+        );
+        console.log("response allMeds", response);
+        const formDataClear = {
+          medicamento: "",
+          codigoItem: "",
+          almacen: "",
+          codigoFarmacia: "",
+          stock: "",
+          vencimiento: "",
+          lote: "",
         };
 
-        dispatch(createMed(updateFormData)).then(() => {
-          setFormData(formDataClear);
-          console.log("medicamento creado: ", updateFormData);
-        });
+        if (response.length > 0) {
+          const existingMed = response[0];
+          //console.log("existente", existingMed.stock + 1);
+
+          const updateFormData = {
+            ...formData,
+            stock: existingMed.stock * 1 + formData.stock * 1,
+          };
+          setFormData(updateFormData);
+
+          //console.log("formData Actualizado", updateFormData);
+
+          dispatch(updateMed(updateFormData)).then(() => {
+            dispatch(getAllMeds());
+            setFormData(formDataClear);
+            console.log("Medicamento actualizado:", updateFormData);
+          });
+        } else {
+          //NO EXISTE, ENTONCES LO CREAMOS
+          const updateFormData = {
+            ...formData,
+            stock: formData.stock,
+          };
+
+          dispatch(createMed(updateFormData)).then(() => {
+            setFormData(formDataClear);
+            console.log("medicamento creado: ", updateFormData);
+          });
+        }
+      } catch (error) {
+        toast.error(
+          "Hubo un error al registrar el medicamento. Por favor, inténtelo nuevamente."
+        );
+        console.error("Error al registrar el medicamento:", error);
       }
-    } catch (error) {
-      toast.error(
-        "Hubo un error al registrar el medicamento. Por favor, inténtelo nuevamente."
-      );
-      console.error("Error al registrar el medicamento:", error);
+    } else {
+      toast.error("Ingrese una cantidad validad.");
     }
   };
 
@@ -195,61 +198,76 @@ const IngresoMedicamento = () => {
     }
   };
 
-  const aceptar = (transfId, destino, codigoItem, lote, stock) => {
-    console.log("aceptar", destino, codigoItem);
+  const aceptar = async (transfId, destino, codigoItem, lote, stock) => {
+    console.log("aceptar", destino, codigoItem, lote, stock);
 
     try {
-      dispatch(
+      // Actualiza el estado de la transferencia a "Recibido"
+      const updateTransferResponse = await dispatch(
         updateTransfer({
           estado: "Recibido",
           transfId,
-          codigoFarmacia: destino,
         })
-      ).then((data) => {
-        console.log("Medicamento Aceptado ", data);
-        dispatch(getTransfer()).then((data) => {
-          setInformeTransito(data.payload);
-          console.log(data.payload);
-        });
-      });
-    } catch (error) {
-      console.log("error al actualizar el registro de transferencia", error);
-    }
-    const medId = allMeds.filter(
-      (e) =>
-        e.codigoItem === codigoItem &&
-        e.codigoFarmacia === destino &&
-        e.lote === lote
-    )[0];
-    console.log("medId", medId);
+      );
 
-    if (medId) {
-      const update = {
-        ...medId,
-        stock: medId.stock * 1 + stock * 1,
-      };
-      dispatch(updateMed(update)).then(() => {
+      console.log("Medicamento Aceptado:", updateTransferResponse);
+
+      // Refresca la lista de transferencias
+      const transferData = await dispatch(getTransfer());
+      setInformeTransito(transferData.payload);
+      console.log("Transfer pasa a recibido", transferData.payload);
+
+      // Buscar medicamento en la farmacia destino con el mismo lote
+      const medId = allMeds.find(
+        (e) =>
+          e.codigoItem === codigoItem &&
+          e.codigoFarmacia === destino &&
+          e.lote === lote
+      );
+
+      console.log("Aceptar medId", medId);
+
+      if (medId) {
+        // Si el medicamento ya existe, actualizar stock
+        const update = {
+          ...medId,
+          stock: Number(medId.stock) + Number(stock), // Asegurar que sean números
+        };
+
+        console.log("update", update);
+
+        await dispatch(updateMed(update));
         console.log("Medicamento actualizado:", update);
-        getPharmacyMeds();
-        dispatch(getTransfer());
-      });
-    } else {
-      const newOne = allMeds.filter((e) => e.codigoItem === codigoItem)[0];
-      console.log("newOne", newOne);
-      const newMed = {
-        medicamento: newOne.medicamento,
-        codigoItem: newOne.codigoItem,
-        almacen: newOne.almacen,
-        lote,
-        codigoFarmacia: destino,
-        stock,
-        vencimiento: newOne.vencimiento,
-      };
-      dispatch(createMed(newMed)).then(() => {
+      } else {
+        // Si no existe, buscar información del medicamento en `allMeds`
+        const newOne = allMeds.find((e) => e.codigoItem === codigoItem);
+
+        if (!newOne) {
+          throw new Error("No se encontró información del medicamento.");
+        }
+
+        console.log("newOne", newOne);
+
+        // Crear un nuevo registro de medicamento
+        const newMed = {
+          medicamento: newOne.medicamento,
+          codigoItem,
+          almacen: newOne.almacen,
+          lote,
+          codigoFarmacia: destino,
+          stock: Number(stock), // Asegurar que sea número
+          vencimiento: newOne.vencimiento,
+        };
+
+        await dispatch(createMed(newMed));
         console.log("Nuevo medicamento registrado:", newMed);
-        getPharmacyMeds();
-        dispatch(getTransfer());
-      });
+      }
+
+      // Refrescar inventario y transferencias después de actualizar los datos
+      await getPharmacyMeds();
+      await dispatch(getTransfer());
+    } catch (error) {
+      console.error("Error al actualizar el registro de transferencia:", error);
     }
   };
 
@@ -477,29 +495,31 @@ const IngresoMedicamento = () => {
               </thead>
               <tbody>
                 {informeStock.length > 0 ? (
-                  informeStock.map((item, index) => {
-                    const fecha = item.vencimiento.split("T")[0].split("-");
-                    const ubicacion = drugstore.find(
-                      (e) => e.codigo === item.codigoFarmacia
-                    ); // Busca la ubicación correspondiente
-                    return (
-                      <tr key={index}>
-                        <td>
-                          {item.codigoFarmacia + " "}
-                          {ubicacion
-                            ? ubicacion.nombre
-                            : "Ubicación no encontrada"}
-                        </td>
-                        <td>{item.lote}</td>
-                        <td>{item.codigoItem}</td>
-                        <td>{item.medicamento}</td>
-                        <td>{item.stock}</td>
-                        <td>
-                          {fecha[2]}-{fecha[1]}-{fecha[0]}
-                        </td>
-                      </tr>
-                    );
-                  })
+                  informeStock
+                    .filter((item) => item.stock > 0)
+                    .map((item, index) => {
+                      const fecha = item.vencimiento.split("T")[0].split("-");
+                      const ubicacion = drugstore.find(
+                        (e) => e.codigo === item.codigoFarmacia
+                      ); // Busca la ubicación correspondiente
+                      return (
+                        <tr key={index}>
+                          <td>
+                            {item.codigoFarmacia + " "}
+                            {ubicacion
+                              ? ubicacion.nombre
+                              : "Ubicación no encontrada"}
+                          </td>
+                          <td>{item.lote}</td>
+                          <td>{item.codigoItem}</td>
+                          <td>{item.medicamento}</td>
+                          <td>{item.stock}</td>
+                          <td>
+                            {fecha[2]}-{fecha[1]}-{fecha[0]}
+                          </td>
+                        </tr>
+                      );
+                    })
                 ) : (
                   <tr>
                     <td colSpan="6">No hay datos disponibles.</td>
@@ -524,6 +544,7 @@ const IngresoMedicamento = () => {
               <tbody>
                 {informeTransito.length > 0 ? (
                   informeTransito.map((item, index) => {
+                    console.log("en transito", item);
                     const origen = drugstore.find(
                       (e) =>
                         e.codigo ===

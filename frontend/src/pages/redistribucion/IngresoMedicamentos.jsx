@@ -64,8 +64,12 @@ const ReIngresoMedicamento = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (formData.stock <= 0) {
+      toast.error("Por favor ingrese una cantidad válida");
+      return;
+    }
     const origen = meds.find((item) => item._id === formData.codigoOrigen);
-    console.log(origen);
+    console.log("origen", origen);
 
     if (origen.stock >= formData.stock) {
       const updateOrigen = {
@@ -264,16 +268,18 @@ const ReIngresoMedicamento = () => {
                   );
 
                   // Retornar una opción por cada medicamento relacionado
-                  return medsRelacionados.map((med) => (
-                    //console.log("farmaciaFiltrada", med),
-                    <option
-                      key={`${filteredFarmacia.codigo}-${med.lote}`}
-                      value={med._id}
-                    >
-                      {filteredFarmacia.nombre} - Lote: {med.lote} - Stock:{" "}
-                      {med.stock}
-                    </option>
-                  ));
+                  return medsRelacionados
+                    .filter((item) => item.stock > 0)
+                    .map((med) => (
+                      //console.log("farmaciaFiltrada", med),
+                      <option
+                        key={`${filteredFarmacia.codigo}-${med.lote}`}
+                        value={med._id}
+                      >
+                        {filteredFarmacia.nombre} - Lote: {med.lote} - Stock:{" "}
+                        {med.stock}
+                      </option>
+                    ));
                 })}
             </select>
             {formData.codigoOrigen && (

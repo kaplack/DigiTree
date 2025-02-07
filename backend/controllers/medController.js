@@ -60,7 +60,7 @@ const createMed = asyncHandler(async (req, res) => {
     vencimiento,
     lote,
   } = req.body;
-  console.log(req.body);
+  //console.log(req.body);
 
   if (!medicamento || !codigoItem) {
     res.status(400);
@@ -88,7 +88,7 @@ const createMed = asyncHandler(async (req, res) => {
   });
 
   res.status(201).json(med);
-  console.log(med);
+  //console.log(med);
 });
 
 // @desc    Delete user works
@@ -124,38 +124,65 @@ const createMed = asyncHandler(async (req, res) => {
 // @route   PUT /api/works/:id
 // @access  Private
 const updateMed = asyncHandler(async (req, res) => {
-  // Get works using id in the JWT
-  console.log("hola del updateMed");
-  const user = await User.findById(req.user.id);
+  try {
+    // Obtener usuario autenticado
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(401).json({
+        message: "Usuario no autorizado para actualizar el medicamento",
+      });
+    }
 
-  if (!user) {
-    res.status(401);
-    throw new Error(
-      "Usuario no existe o ingrese para actualizar el medicamento"
-    );
-  }
-
-  const {
-    medicamento,
-    codigoItem,
-    almacen,
-    codigoFarmacia,
-    stock,
-    vencimiento,
-    lote,
-  } = req.body;
-
-  console.log(stock);
-
-  const updatedWork = await Med.findOneAndUpdate(
-    { codigoItem, codigoFarmacia, lote },
-    {
+    const {
+      medicamento,
+      codigoItem,
+      almacen,
+      codigoFarmacia,
       stock,
-    },
-    { new: true }
-  );
+      vencimiento,
+      lote,
+    } = req.body;
 
-  res.status(200).json(updatedWork);
+    console.log("updateMed - Datos recibidos:", req.body);
+
+    // Validar que los campos clave estén presentes
+    if (!codigoItem || !codigoFarmacia || !lote) {
+      return res.status(400).json({
+        message: "Faltan datos clave (codigoItem, codigoFarmacia, lote).",
+      });
+    }
+
+    // Construir objeto con solo los campos definidos
+    const updateFields = {};
+    if (typeof stock !== "undefined") updateFields.stock = stock;
+    //if (typeof medicamento !== "undefined") updateFields.medicamento = medicamento;
+    //if (typeof almacen !== "undefined") updateFields.almacen = almacen;
+    //if (typeof vencimiento !== "undefined") updateFields.vencimiento = vencimiento;
+
+    console.log("updateMed - Datos a actualizar:", updateFields);
+
+    // Buscar y actualizar el medicamento
+    const updatedMed = await Med.findOneAndUpdate(
+      { codigoItem, codigoFarmacia, lote },
+      updateFields,
+      { new: true, runValidators: true } // `runValidators` asegura validación del esquema
+    );
+
+    if (!updatedMed) {
+      return res.status(404).json({
+        message: "Medicamento no encontrado.",
+      });
+    }
+
+    console.log("updateMed - Medicamento actualizado:", updatedMed);
+    return res.status(200).json(updatedMed);
+  } catch (error) {
+    console.error("updateMed - Error en la actualización:", error);
+    return res.status(500).json({
+      message: "Error al actualizar el medicamento",
+      error: error.message,
+    });
+  }
 });
 
 // @desc    Get All works
@@ -164,12 +191,12 @@ const updateMed = asyncHandler(async (req, res) => {
 
 const getAllMedsByCode = asyncHandler(async (req, res) => {
   try {
-    console.log("medController ", req.body);
-    console.log(req.body);
+    //console.log("medController ", req.body);
+    //console.log(req.body);
     const work = await Med.find(req.body);
 
     //filtrar solo los elementos necesarios para el JobList
-    console.log("getallMEDS", work);
+    //console.log("getallMEDS", work);
     res.status(200).json(work);
   } catch (error) {
     toast.error("No se tiene este medicamento registrado en la base de datos.");

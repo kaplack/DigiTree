@@ -171,6 +171,14 @@ export const medSlice = createSlice({
       // .addCase(getPublicWork.fulfilled, (state, action)=>{
       //     state.work = action.payload
       // })
+      .addCase(updateMed.fulfilled, (state, action) => {
+        state.med = action.payload;
+      })
+      .addCase(updateMed.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload;
+      })
       .addCase(getAllMeds.fulfilled, (state, action) => {
         state.allMeds = action.payload;
       })

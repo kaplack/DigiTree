@@ -190,10 +190,10 @@ const IngresoMedicamento = () => {
               className="btn btn-reverse"
               onClick={getMedReport}
             >
-              Información Consolidada
+              Stock Medicamento en Hospital
             </button>
             <button type="button" className="btn" onClick={getPharmacyMeds}>
-              Información Farmacia
+              Inventario en Farmacia
             </button>
           </div>
         </form>

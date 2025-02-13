@@ -85,6 +85,7 @@ const createMed = asyncHandler(async (req, res) => {
     user: req.user.id,
     vencimiento,
     lote,
+    docId,
   });
 
   res.status(201).json(med);
@@ -141,6 +142,7 @@ const updateMed = asyncHandler(async (req, res) => {
       stock,
       vencimiento,
       lote,
+      docId,
     } = req.body;
 
     console.log("updateMed - Datos recibidos:", req.body);
@@ -155,7 +157,7 @@ const updateMed = asyncHandler(async (req, res) => {
     // Construir objeto con solo los campos definidos
     const updateFields = {};
     if (typeof stock !== "undefined") updateFields.stock = stock;
-    //if (typeof medicamento !== "undefined") updateFields.medicamento = medicamento;
+    if (typeof docId !== "undefined") updateFields.docId = docId;
     //if (typeof almacen !== "undefined") updateFields.almacen = almacen;
     //if (typeof vencimiento !== "undefined") updateFields.vencimiento = vencimiento;
 

@@ -282,16 +282,31 @@ const ReIngresoMedicamento = () => {
                   // Retornar una opción por cada medicamento relacionado
                   return medsRelacionados
                     .filter((item) => item.stock > 0)
-                    .map((med) => (
-                      //console.log("farmaciaFiltrada", med),
-                      <option
-                        key={`${filteredFarmacia.codigo}-${med.lote}`}
-                        value={med._id}
-                      >
-                        {filteredFarmacia.nombre} - Lote: {med.lote} - Stock:{" "}
-                        {med.stock}
-                      </option>
-                    ));
+                    .map((med) => {
+                      const hoy = new Date();
+                      const fechaVencimiento = new Date(med.vencimiento);
+                      const diferenciaDias = Math.ceil(
+                        (fechaVencimiento - hoy) / (1000 * 60 * 60 * 24)
+                      );
+
+                      let color = "green"; // Verde por defecto
+                      if (diferenciaDias <= 30) {
+                        color = "red"; // Rojo si vence en 30 días o menos
+                      } else if (diferenciaDias <= 90) {
+                        color = "orange"; // Amarillo si vence entre 31 y 90 días
+                      }
+
+                      return (
+                        <option
+                          key={`${filteredFarmacia.codigo}-${med.lote}`}
+                          value={med._id}
+                          style={{ color }}
+                        >
+                          {filteredFarmacia.nombre} - Lote: {med.lote} - Stock:{" "}
+                          {med.stock}
+                        </option>
+                      );
+                    });
                 })}
             </select>
             {formData.codigoOrigen && (

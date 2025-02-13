@@ -21,6 +21,9 @@ const medSchema = mongoose.Schema(
     stock: {
       type: Number,
     },
+    docId: {
+      type: Number,
+    },
     lote: {
       type: String,
     },

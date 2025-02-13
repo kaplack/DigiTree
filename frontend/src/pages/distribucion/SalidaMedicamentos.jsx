@@ -22,6 +22,7 @@ const SalidaMedicamento = () => {
     stock: "",
     vencimiento: "",
     lote: "",
+    docId: "",
   });
 
   const drugstore = useSelector((state) => state.drugstore);
@@ -103,7 +104,7 @@ const SalidaMedicamento = () => {
               medicamento: "",
               codigoItem: "",
               almacen: "",
-
+              docId: "",
               codigoFarmacia: "",
               lote: "",
               stock: "",
@@ -308,28 +309,18 @@ const SalidaMedicamento = () => {
 
           {/* Nombre de Almacén*/}
           <div className="form-group">
-            <label htmlFor="warehouseSelect">Almacén:</label>
-            <select
-              id="warehouseSelect"
-              value={formData.almacen}
+            <label htmlFor="stock">
+              Documento de identidad (DNI/CE/PASAPORTE)
+            </label>
+            <input
+              type="number"
+              id="docId"
+              name="docId"
+              className="input"
+              placeholder="Ingrese Documento de Identidad"
               onChange={onChange}
-              name="almacen"
-            >
-              <option value="" disabled>
-                Seleccione un almacén
-              </option>
-              {warehouse.map((almacen) => (
-                <option key={almacen.codigo} value={almacen.codigo}>
-                  {almacen.nombre}
-                </option>
-              ))}
-            </select>
-            {formData.almacen && (
-              <p>
-                Almacén seleccionado:{" "}
-                {warehouse.find((w) => w.codigo === formData.almacen)?.codigo}
-              </p>
-            )}
+              value={formData.docId}
+            />
           </div>
 
           {/* Botones */}
@@ -337,9 +328,9 @@ const SalidaMedicamento = () => {
             <button
               type="button"
               className="btn btn-reverse"
-              onClick={getReporte}
+              //onClick={getReporte}
             >
-              Reporte de Stock Vigente
+              Comprobante de No Stock
             </button>
             <button type="submit" className="btn " onClick={onSubmit}>
               Salida de Medicamento
